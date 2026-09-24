@@ -17,6 +17,16 @@ app.use(express.json());
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+app.get('/', (_req, res) => {
+  res.json({
+    name: 'Binance paper-trading API',
+    status: 'ok',
+    frontend: 'http://localhost:3000',
+    health: '/health',
+    websocket: '/ws',
+  });
+});
+
 app.use('/api/auth', authRouter);
 app.use('/api/markets', marketsRouter);
 app.use('/api/account', accountRouter);
