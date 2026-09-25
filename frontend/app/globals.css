@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #181a20;
+  --color-surface: #1e2329;
+  --color-surface2: #2b3139;
+  --color-line: #2b3139;
+  --color-text: #eaecef;
+  --color-muted: #848e9c;
+  --color-dim: #5e6673;
+  --color-yellow: #fcd535;
+  --color-green: #2ebd85;
+  --color-red: #f6465d;
+  --color-onyellow: #0b0e11;
+  --color-ongreen: #0b0e11;
+  --color-skeleton: #2b3139;
+  --color-toast: #5b636d;
+  --color-marksurface: #2a2e35;
+
+  --animate-skeleton: skeleton 1.3s ease-in-out infinite;
+  @keyframes skeleton {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  background: #0b0e11;
+  color: var(--color-text);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+input {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-yellow);
+  outline-offset: 1px;
+}
+
+.app-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.app-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-surface2);
+  border-radius: 2px;
+}
+.app-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
