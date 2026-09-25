@@ -1,5 +1,4 @@
-// @ts-ignore
-import { DatabaseSync } from 'node:sqlite';
+import Database from 'better-sqlite3';
 import fs from 'node:fs';
 import path from 'node:path';
 import { config } from '../config';
@@ -7,10 +6,13 @@ import { config } from '../config';
 const dir = path.dirname(config.dbPath);
 if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-export const db = new DatabaseSync(config.dbPath);
-db.exec('PRAGMA journal_mode = WAL;');
-db.exec('PRAGMA foreign_keys = ON;');
+export const db = new Database(config.dbPath);
+db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
 
+/**
+ * Schema is applied idempotently on boot.
+ */
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
