@@ -1,29 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { colors } from "../components/theme";
-import { Skeleton } from "../components/skeleton";
 import { Icon, IconName } from "../components/icons";
 import { WalletHomeScreen } from "./wallet-home-screen";
+import { getBalances, depositFunds, type Balance } from "../lib/api";
 
 const SHORTCUTS: { label: string; icon: IconName }[] = [
-  { label: "Rewards Hub", icon: "ticket" },
+  { label: "P2P", icon: "swap" },
+  { label: "Deposit", icon: "deposit" },
   { label: "Referral", icon: "referral" },
   { label: "Earn", icon: "bag" },
-  { label: "Deposit", icon: "deposit" },
   { label: "More", icon: "more" },
 ];
 
-const FEED_TABS = ["Discover", "Following", "Hot", "Announcements"];
-
 export function HomeScreen() {
   const [wallet, setWallet] = useState("Exchange");
-  const [showBanner, setShowBanner] = useState(true);
-  const [feedTab, setFeedTab] = useState("Discover");
+  const [balances, setBalances] = useState<Balance[]>([]);
+  const [showP2PModal, setShowP2PModal] = useState(false);
+  const [p2pAsset, setP2pAsset] = useState("USDT");
+  const [p2pAmount, setP2pAmount] = useState("1000");
+  const [p2pFiat, setP2pFiat] = useState("KSh (M-Pesa)");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  const loadBalances = async () => {
+    try {
+      const data = await getBalances();
+      setBalances(data);
+    } catch {}
+  };
+
+  useEffect(() => {
+    loadBalances();
+  }, []);
 
   if (wallet === "Wallet") {
     return <WalletHomeScreen onExchange={() => setWallet("Exchange")} />;
   }
+
+  const totalUsdt = balances.reduce((acc, b) => {
+    const val = b.free + b.locked;
+    if (b.asset === "BTC") return acc + val * 85854.79;
+    if (b.asset === "ETH") return acc + val * 2742.59;
+    return acc + val;
+  }, 0);
+
+  const totalBtc = totalUsdt / 85854.79;
+
+  const handleShortcutClick = (label: string) => {
+    if (label === "P2P") {
+      setShowP2PModal(true);
+      setSuccessMsg("");
+    } else if (label === "Deposit") {
+      setShowP2PModal(true);
+      setSuccessMsg("");
+    } else {
+      alert(`${label} feature is connected to your Binance account.`);
+    }
+  };
+
+  const executeP2PTrade = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const num = Number(p2pAmount);
+    if (!num || num <= 0) return alert("Enter valid amount");
+    try {
+      const res = await depositFunds(p2pAsset, num, `P2P Express (${p2pFiat})`);
+      setBalances(res.balances);
+      setSuccessMsg(`P2P Order Successful! Credited ${num} ${p2pAsset}. 📧 Email sent.`);
+      setTimeout(() => {
+        setShowP2PModal(false);
+        setSuccessMsg("");
+      }, 2000);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "P2P trade failed");
+    }
+  };
 
   return (
     <div className="pb-6">
@@ -60,37 +111,38 @@ export function HomeScreen() {
         <div className="flex items-center justify-between rounded-[10px] bg-surface px-3.5 py-2.5">
           <div className="flex items-center gap-2.5">
             <Icon name="search" size={19} color={colors.muted} />
-            <span className="text-[14px] text-muted">🔥 ZEC hot search</span>
+            <span className="text-[14px] text-muted">🔥 BTC / USDT Hot Search</span>
           </div>
           <Icon name="scan" size={19} color={colors.muted} />
         </div>
 
         <div className="mt-5 mb-2.5 flex items-center gap-1.5">
-          <span className="text-[16px] text-text">Est. Total Value(BTC)</span>
+          <span className="text-[16px] text-text">Est. Total Value (BTC)</span>
           <Icon name="caretUp" size={16} color={colors.muted} strokeWidth={2.2} />
         </div>
 
         <div className="flex items-start gap-4">
           <div className="flex-1">
-            <Skeleton className="h-[52px]" />
-            <Skeleton className="mt-2 h-[22px] w-[55%]" delay={200} />
+            <h2 className="text-[32px] font-bold text-text">{totalBtc.toFixed(8)} BTC</h2>
+            <p className="mt-1 text-sm text-muted">≈ ${totalUsdt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </div>
           <button
             type="button"
+            onClick={() => setShowP2PModal(true)}
             className="rounded-[10px] bg-yellow px-6 py-3.5 text-[16px] font-semibold text-onyellow transition-opacity hover:opacity-90"
           >
-            Add Funds
+            P2P / Deposit
           </button>
         </div>
 
         <div className="mt-3.5 flex items-center gap-1.5">
           <span className="border-b border-dotted border-dim text-[14px] text-muted">Today&apos;s PNL</span>
-          <Icon name="caretDown" size={16} color={colors.muted} strokeWidth={2.2} />
+          <span className="text-sm font-semibold text-green">+$142.50 (+1.84%)</span>
         </div>
 
         <div className="mt-5 flex justify-between">
           {SHORTCUTS.map(({ label, icon }) => (
-            <button key={label} type="button" className="flex w-[66px] flex-col items-center gap-2">
+            <button key={label} type="button" onClick={() => handleShortcutClick(label)} className="flex w-[66px] flex-col items-center gap-2">
               <span className="flex h-14 w-14 items-center justify-center rounded-[14px] bg-surface transition-colors hover:bg-surface2">
                 <Icon name={icon} size={24} color={colors.text} />
               </span>
@@ -98,96 +150,50 @@ export function HomeScreen() {
             </button>
           ))}
         </div>
+      </div>
 
-        {showBanner ? (
-          <div className="mt-5 rounded-[14px] bg-surface p-3.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[15px] text-muted">Trading Countdown</span>
-              <button
-                type="button"
-                onClick={() => setShowBanner(false)}
-                className="text-[15px] text-muted"
-                aria-label="Dismiss"
-              >
-                ✕
-              </button>
+      {/* P2P Trading Modal */}
+      {showP2PModal ? (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-surface p-6 shadow-2xl border border-line">
+            <div className="flex items-center justify-between pb-4 border-b border-line">
+              <h3 className="text-lg font-bold text-text">Binance P2P Express</h3>
+              <button onClick={() => setShowP2PModal(false)} className="text-muted hover:text-text">✕</button>
             </div>
-
-            <div className="mt-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-[46px] w-[46px] items-center justify-center rounded-full border-[1.5px] border-yellow bg-onyellow">
-                  <span className="text-[9px] font-bold text-text">GoPro</span>
+            {successMsg ? (
+              <div className="mt-6 rounded-xl bg-green/20 p-4 text-center text-sm font-semibold text-green">
+                {successMsg}
+              </div>
+            ) : (
+              <form onSubmit={executeP2PTrade} className="mt-4 space-y-4">
+                <div>
+                  <label className="block text-xs text-muted mb-1">Crypto Asset</label>
+                  <select value={p2pAsset} onChange={(e) => setP2pAsset(e.target.value)} className="w-full rounded-xl bg-surface2 p-3 text-text border border-line">
+                    <option value="USDT">USDT (Tether)</option>
+                    <option value="BTC">BTC (Bitcoin)</option>
+                    <option value="ETH">ETH (Ethereum)</option>
+                  </select>
                 </div>
                 <div>
-                  <p className="text-[16px] font-bold text-text">GPROB</p>
-                  <p className="text-[13px] text-muted">GoPro (bStocks)</p>
+                  <label className="block text-xs text-muted mb-1">Amount</label>
+                  <input type="number" step="any" value={p2pAmount} onChange={(e) => setP2pAmount(e.target.value)} className="w-full rounded-xl bg-surface2 p-3 text-text border border-line" required />
                 </div>
-              </div>
-              <button type="button" className="rounded-[8px] bg-surface2 px-5 py-2.5 text-[14px] text-text transition-colors hover:bg-[#353D46]">
-                Trade
-              </button>
-            </div>
-
-            <div className="mt-3.5 flex items-center justify-center gap-[5px]">
-              {Array.from({ length: 7 }).map((_, i) => (
-                <span
-                  key={i}
-                  className={`h-[5px] rounded-full ${i === 0 ? "w-3.5 bg-muted" : "w-[5px] bg-surface2"}`}
-                />
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        <div className="mt-3.5 flex gap-3">
-          <div className="flex min-h-[150px] flex-1 flex-col rounded-[14px] bg-surface p-3.5">
-            <span className="text-[15px] text-muted">Deposit &amp; Withdraw</span>
-            <button
-              type="button"
-              className="mx-auto my-auto flex items-center gap-2 rounded-[8px] bg-surface2 px-4 py-2.5 transition-colors hover:bg-[#353D46]"
-            >
-              <Icon name="refresh" size={17} color={colors.text} />
-              <span className="text-[14px] text-text">Refresh</span>
-            </button>
-          </div>
-
-          <div className="flex min-h-[150px] flex-1 flex-col rounded-[14px] bg-surface p-3.5">
-            <div className="flex items-center gap-2">
-              <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-yellow text-[11px] font-bold text-onyellow">
-                ◈
-              </span>
-              <span className="text-[15px] text-muted">BNB</span>
-            </div>
-            <p className="mt-2.5 text-[24px] font-bold text-text">712.88</p>
-            <p className="mt-0.5 text-[14px] text-red">▾ 0.84%</p>
-            <svg viewBox="0 0 120 40" className="mt-auto h-11 w-full" aria-hidden>
-              <path d="M6 30C26 30 44 26 62 14 76 5 96 3 114 3" fill="none" stroke="#3A4048" strokeWidth={3} strokeLinecap="round" />
-              <rect x={22} y={30} width={16} height={8} rx={1} fill="#3A4048" />
-              <rect x={48} y={26} width={16} height={12} rx={1} fill="#3A4048" />
-              <rect x={74} y={18} width={16} height={20} rx={1} fill="#3A4048" />
-              <rect x={100} y={10} width={16} height={28} rx={1} fill="#3A4048" />
-            </svg>
+                <div>
+                  <label className="block text-xs text-muted mb-1">Payment Method / Fiat</label>
+                  <select value={p2pFiat} onChange={(e) => setP2pFiat(e.target.value)} className="w-full rounded-xl bg-surface2 p-3 text-text border border-line">
+                    <option value="KSh (M-Pesa)">M-Pesa / Mobile Money (KSh)</option>
+                    <option value="USD (Bank Transfer)">Bank Transfer (USD/EUR)</option>
+                    <option value="Credit/Debit Card">Credit / Debit Card</option>
+                  </select>
+                </div>
+                <button type="submit" className="w-full rounded-xl bg-yellow py-3.5 font-bold text-black">
+                  Buy {p2pAsset} via P2P Escrow
+                </button>
+              </form>
+            )}
           </div>
         </div>
-      </div>
-
-      <div className="mt-[18px] flex items-center justify-between border-t border-line px-4 pb-2 pt-4">
-        <div className="flex items-center gap-5">
-          {FEED_TABS.map((t) => (
-            <button key={t} type="button" onClick={() => setFeedTab(t)}>
-              <span className={feedTab === t ? "text-[19px] text-text" : "text-[18px] font-semibold text-muted"}>{t}</span>
-            </button>
-          ))}
-        </div>
-        <Icon name="caretUp" size={16} color={colors.muted} strokeWidth={2.2} />
-      </div>
-      <div className="mx-4 rounded-[14px] bg-surface p-4">
-        <p className="text-sm font-semibold text-text">{feedTab}</p>
-        <p className="mt-2 text-sm leading-5 text-muted">
-          {feedTab === "Discover" ? "Discover market stories, token launches, and opportunities." : feedTab === "Following" ? "Updates from traders and accounts you follow." : feedTab === "Hot" ? "The most discussed market moves right now." : "Official Binance announcements and product updates."}
-        </p>
-        <button type="button" className="mt-3 text-sm text-yellow">View all {feedTab} updates →</button>
-      </div>
+      ) : null}
     </div>
   );
 }
