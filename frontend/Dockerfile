@@ -4,6 +4,7 @@ COPY package*.json ./
 RUN npm ci
 COPY tsconfig.json postcss.config.mjs next-env.d.ts ./
 COPY app ./app
+COPY public ./public
 ENV NEXT_PUBLIC_API_URL=http://localhost:4000
 RUN npm run build
 
