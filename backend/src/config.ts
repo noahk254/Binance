@@ -16,4 +16,6 @@ export const config = {
   binanceRestBase: process.env.BINANCE_REST_BASE ?? 'https://api.binance.com',
   binanceFapiBase: process.env.BINANCE_FAPI_BASE ?? 'https://fapi.binance.com',
   binanceWsBase: process.env.BINANCE_WS_BASE ?? 'wss://stream.binance.com:9443',
+  binanceApiKey: process.env.BINANCE_API_KEY ?? '',
+  binanceSecretKey: process.env.BINANCE_SECRET_KEY ?? '',
 } as const;

@@ -17,10 +17,15 @@ const CATEGORY_DATA: Record<string, MarketTicker[]> = {
     { symbol: "ETHUSDT", lastPrice: "2742.59", changePercent: "1.182", high: "", low: "", quoteVolume: "" },
   ],
   TradFi: [
-    { symbol: "MSTR", lastPrice: "20191.90", changePercent: "13.44", high: "", low: "", quoteVolume: "" },
-    { symbol: "AEHR", lastPrice: "11350.59", changePercent: "12.59", high: "", low: "", quoteVolume: "" },
-    { symbol: "LUNR", lastPrice: "1821.35", changePercent: "12.16", high: "", low: "", quoteVolume: "" },
-    { symbol: "XLK", lastPrice: "24564.66", changePercent: "10.79", high: "", low: "", quoteVolume: "" },
+    { symbol: "NVDA", lastPrice: "14228.50", changePercent: "+4.12", high: "", low: "", quoteVolume: "" },
+    { symbol: "TSLA", lastPrice: "34852.10", changePercent: "+2.85", high: "", low: "", quoteVolume: "" },
+    { symbol: "AAPL", lastPrice: "29841.20", changePercent: "+1.35", high: "", low: "", quoteVolume: "" },
+    { symbol: "MSFT", lastPrice: "56320.00", changePercent: "+0.92", high: "", low: "", quoteVolume: "" },
+    { symbol: "AMZN", lastPrice: "26430.80", changePercent: "+3.14", high: "", low: "", quoteVolume: "" },
+    { symbol: "MSTR", lastPrice: "20191.90", changePercent: "+13.44", high: "", low: "", quoteVolume: "" },
+    { symbol: "AEHR", lastPrice: "11350.59", changePercent: "+12.59", high: "", low: "", quoteVolume: "" },
+    { symbol: "LUNR", lastPrice: "1821.35", changePercent: "+12.16", high: "", low: "", quoteVolume: "" },
+    { symbol: "XLK", lastPrice: "24564.66", changePercent: "+10.79", high: "", low: "", quoteVolume: "" },
   ],
   Alpha: [
     { symbol: "PAID", lastPrice: "3.05477", changePercent: "-2.46", high: "", low: "", quoteVolume: "" },
@@ -36,6 +41,18 @@ const CATEGORY_DATA: Record<string, MarketTicker[]> = {
 
 const SECTION_DATA: Record<string, MarketTicker[]> = {
   Stocks: [
+    { symbol: "NVDA", lastPrice: "14228.50", changePercent: "4.12", high: "", low: "", quoteVolume: "" },
+    { symbol: "TSLA", lastPrice: "34852.10", changePercent: "2.85", high: "", low: "", quoteVolume: "" },
+    { symbol: "AAPL", lastPrice: "29841.20", changePercent: "1.35", high: "", low: "", quoteVolume: "" },
+    { symbol: "MSFT", lastPrice: "56320.00", changePercent: "0.92", high: "", low: "", quoteVolume: "" },
+    { symbol: "AMZN", lastPrice: "26430.80", changePercent: "3.14", high: "", low: "", quoteVolume: "" },
+    { symbol: "GOOGL", lastPrice: "21940.30", changePercent: "-0.45", high: "", low: "", quoteVolume: "" },
+    { symbol: "META", lastPrice: "82140.00", changePercent: "5.18", high: "", low: "", quoteVolume: "" },
+    { symbol: "NFLX", lastPrice: "11820.60", changePercent: "-1.12", high: "", low: "", quoteVolume: "" },
+    { symbol: "COIN", lastPrice: "38920.40", changePercent: "8.64", high: "", low: "", quoteVolume: "" },
+    { symbol: "HOOD", lastPrice: "4520.10", changePercent: "6.21", high: "", low: "", quoteVolume: "" },
+    { symbol: "SPY", lastPrice: "78450.00", changePercent: "0.85", high: "", low: "", quoteVolume: "" },
+    { symbol: "QQQ", lastPrice: "65410.20", changePercent: "1.42", high: "", low: "", quoteVolume: "" },
     { symbol: "SNXX", lastPrice: "2302.68", changePercent: "16.74", high: "", low: "", quoteVolume: "" },
     { symbol: "MSTR", lastPrice: "20191.90", changePercent: "13.44", high: "", low: "", quoteVolume: "" },
     { symbol: "AEHR", lastPrice: "11350.59", changePercent: "12.59", high: "", low: "", quoteVolume: "" },

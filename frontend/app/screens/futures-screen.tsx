@@ -87,12 +87,7 @@ export function FuturesScreen() {
         <span className="ml-auto text-white cursor-pointer" onClick={() => alert("Menu")}>☰</span>
       </div>
 
-      {/* New Listing Banner */}
-      <div className="flex items-center gap-2 px-4 py-2.5 text-[12.5px] text-yellow border-b border-[#2B3139] bg-[#181A20]/50">
-        <span>🚀</span>
-        <span className="truncate">New Trading Pair: Binance Will List Hyperliquid (HYP…</span>
-        <span className="ml-auto text-[#848E9C] cursor-pointer">✕</span>
-      </div>
+
 
       {successMsg ? (
         <div className="m-3 rounded-lg bg-green/20 p-2.5 text-center text-xs font-semibold text-green">

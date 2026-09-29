@@ -108,7 +108,7 @@ export function HomeScreen() {
         <div className="flex items-center gap-4 text-lg">
           <span>🏷️</span>
           <span className="relative">
-            💬
+            <i className="fa-sharp fa-light fa-message-captions"></i>
             <span className="absolute -top-1.5 -right-2.5 bg-[#F0B90B] text-black text-[9px] font-bold rounded-full px-1">99+</span>
           </span>
         </div>
@@ -159,61 +159,59 @@ export function HomeScreen() {
         </div>
 
         {/* Countdown Card / Trading Card */}
-        <div className="mt-4 bg-[#1E2026] rounded-xl p-3.5">
-          <div className="flex justify-between items-center text-[#848E9C] text-xs">
+        <div className="mt-4 bg-[#1E2026] rounded-xl p-3.5 border border-[#2B3139]">
+          <div className="flex justify-between items-center text-[#848E9C] text-xs mb-2">
             <span>Trading Countdown</span>
             <span className="cursor-pointer">✕</span>
           </div>
-          <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-[30px] h-[30px] rounded-full bg-[#627EEA] text-white flex items-center justify-center text-base font-bold">
-                Ξ
+              <div className="w-[30px] h-[30px] rounded-full bg-[#FCD535] text-black flex items-center justify-center text-xs font-extrabold">
+                S
               </div>
-              <span className="font-semibold text-white">ETHUSDT<span className="bg-[#2B3139] text-[#848E9C] text-[10px] px-1.5 py-0.5 rounded ml-1.5">Qtly</span></span>
+              <span className="font-bold text-white text-base">SECZUSDT</span>
             </div>
-            <button onClick={() => setShowAddFundsSheet(true)} className="bg-[#2B3139] text-white text-xs px-5 py-2 rounded-lg font-semibold">
+            <button onClick={() => setShowAddFundsSheet(true)} className="bg-[#2B3139] text-white text-xs px-5 py-2 rounded-lg font-semibold hover:bg-[#3A4048]">
               Trade
             </button>
           </div>
-          <div className="flex gap-1 justify-center mt-3.5">
-            <span className="w-1 h-1 rounded-full bg-[#3A4048]"></span>
-            <span className="w-3.5 h-1 rounded-full bg-[#5A6169]"></span>
-            <span className="w-1 h-1 rounded-full bg-[#3A4048]"></span>
-            <span className="w-1 h-1 rounded-full bg-[#3A4048]"></span>
-          </div>
         </div>
 
-        {/* Deposit & BNB row */}
-        <div className="flex gap-3 mt-3.5">
-          <div className="flex-1 bg-[#1E2026] rounded-xl p-4 flex flex-col items-center justify-center gap-2.5 h-[150px]">
-            <span className="text-[#848E9C] text-[13px]">Deposit</span>
-            <span className="text-[#848E9C] text-[11px]">Click to View More</span>
-            <button onClick={() => setShowDepositModal(true)} className="bg-[#2B3139] text-white text-xs px-6 py-2 rounded-lg font-semibold">
-              Deposit
-            </button>
-          </div>
-          <div className="flex-1 bg-[#1E2026] rounded-xl p-3.5">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-5 h-5 rounded-full bg-[#F0B90B] text-black text-[11px] font-extrabold flex items-center justify-center">◈</span>
-              <span className="font-bold text-white">BNB</span>
+        {/* Hot / TradFi / Alpha / New Tabs */}
+        <div className="flex gap-5 border-t border-[#2B3139] mt-5 pt-4 text-base">
+          <span className="text-white font-bold cursor-pointer">Hot</span>
+          <span className="text-[#848E9C] cursor-pointer hover:text-white">TradFi</span>
+          <span className="text-[#848E9C] cursor-pointer hover:text-white">Alpha</span>
+          <span className="text-[#848E9C] cursor-pointer hover:text-white">New</span>
+        </div>
+
+        {/* Coin List */}
+        <div className="mt-3 space-y-4 pb-4">
+          {[
+            { name: "BNB", price: "764.20", ksh: "99,132.02", change: "+0.12%", color: "#FCD535", letter: "◈" },
+            { name: "BTC", price: "84,008.00", ksh: "10,897,517.76", change: "+1.17%", color: "#F7931A", letter: "₿" },
+            { name: "ETH", price: "2,718.41", ksh: "352,632.15", change: "+2.12%", color: "#627EEA", letter: "Ξ" },
+            { name: "SOL", price: "119.48", ksh: "15,498.95", change: "+0.66%", color: "#14F195", letter: "S" },
+            { name: "DOGE", price: "0.09516", ksh: "12.34", change: "+2.07%", color: "#C2A633", letter: "Ð" },
+          ].map((coin) => (
+            <div key={coin.name} className="flex items-center justify-between py-1 border-b border-[#2B3139]/40 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs" style={{ backgroundColor: coin.color, color: coin.color === "#FCD535" || coin.color === "#14F195" ? "#000" : "#fff" }}>
+                  {coin.letter}
+                </div>
+                <div>
+                  <div className="text-white font-bold text-base">{coin.name}</div>
+                  <div className="text-[#848E9C] text-xs">KSh {coin.ksh}</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-white font-bold text-base">{coin.price}</div>
+                <div className="inline-block bg-[#2EBD85] text-white text-[11px] font-bold px-1.5 py-0.5 rounded mt-1">
+                  {coin.change}
+                </div>
+              </div>
             </div>
-            <div className="text-[19px] font-bold text-white">780.25</div>
-            <div className="text-[#0ECB81] text-xs font-semibold mt-0.5">▲ 1.19%</div>
-            <svg className="mt-2" width="100%" height="32" viewBox="0 0 140 32">
-              <polyline points="0,22 15,18 30,20 45,12 60,15 75,8 90,12 105,6 120,10 140,2" fill="none" stroke="#0ECB81" strokeWidth="2" />
-            </svg>
-          </div>
-        </div>
-
-        {/* Feed tabs */}
-        <div className="flex gap-5 border-t border-[#2B3139] mt-4 pt-3.5 text-sm text-[#848E9C]">
-          <span className="text-white font-bold relative">
-            Discover
-            <span className="absolute -top-1 -right-2 w-1.5 h-1.5 bg-[#F0B90B] rounded-full"></span>
-          </span>
-          <span>Following</span>
-          <span>Stocks</span>
-          <span>Campaigns ⌃</span>
+          ))}
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import { config } from '../config';
+import crypto from 'crypto';
 
 export interface TickerSummary {
   symbol: string;
@@ -110,4 +111,74 @@ export async function getLastPrice(symbol: string): Promise<number> {
   } catch {
     return Number(FALLBACK_TICKERS[symbol]?.lastPrice ?? '100.00');
   }
+}
+
+export interface BinanceDepositAddress {
+  address: string;
+  coin: string;
+  tag?: string;
+  url?: string;
+}
+
+function signSapiQuery(queryString: string): string {
+  if (!config.binanceSecretKey) {
+    throw new Error('Binance secret key not configured');
+  }
+  return crypto.createHmac('sha256', config.binanceSecretKey).update(queryString).digest('hex');
+}
+
+export async function getBinanceDepositAddress(coin: string, network?: string): Promise<BinanceDepositAddress> {
+  if (!config.binanceApiKey || !config.binanceSecretKey) {
+    throw new Error('Binance API credentials (BINANCE_API_KEY and BINANCE_SECRET_KEY) are required for real Binance deposits.');
+  }
+
+  const timestamp = Date.now();
+  let query = `coin=${encodeURIComponent(coin.toUpperCase())}&timestamp=${timestamp}`;
+  if (network) {
+    query += `&network=${encodeURIComponent(network.toUpperCase())}`;
+  }
+  const signature = signSapiQuery(query);
+  const url = `${config.binanceRestBase}/sapi/v1/capital/deposit/address?${query}&signature=${signature}`;
+
+  const res = await fetch(url, {
+    headers: {
+      'X-MBX-APIKEY': config.binanceApiKey,
+    },
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Binance API error (${res.status}): ${errText}`);
+  }
+
+  const raw = await res.json() as { address: string; coin: string; tag?: string; url?: string };
+  return {
+    address: raw.address,
+    coin: raw.coin,
+    tag: raw.tag,
+    url: raw.url,
+  };
+}
+
+export async function getBinanceDepositHistory(coin?: string, startTime?: number): Promise<any[]> {
+  if (!config.binanceApiKey || !config.binanceSecretKey) {
+    return [];
+  }
+
+  const timestamp = Date.now();
+  let query = `timestamp=${timestamp}`;
+  if (coin) query += `&coin=${encodeURIComponent(coin.toUpperCase())}`;
+  if (startTime) query += `&startTime=${startTime}`;
+
+  const signature = signSapiQuery(query);
+  const url = `${config.binanceRestBase}/sapi/v1/capital/deposit/hisrec?${query}&signature=${signature}`;
+
+  const res = await fetch(url, {
+    headers: {
+      'X-MBX-APIKEY': config.binanceApiKey,
+    },
+  });
+
+  if (!res.ok) return [];
+  return res.json() as Promise<any[]>;
 }

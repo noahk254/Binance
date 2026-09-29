@@ -1,7 +1,7 @@
 "use client";
 
 const SECTIONS: Array<[string, string[]]> = [
-  ["General", ["UID|517550898"]],
+  ["General", ["UID|522222635"]],
   ["Preference", ["Language|English (Africa)", "Currency|KES", "Asset Filter|"]],
   ["Others", ["Help & Support|", "Clear Cache and Relaunch|", "About Us|", "Check for updates|v3.20.6"]],
 ];

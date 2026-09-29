@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 import { requireAuth, AuthedRequest } from '../middleware/auth';
 import { asyncHandler } from '../middleware/error';
 import { adjustBalance, getBalances } from '../services/account.service';
+import { getBinanceDepositAddress } from '../services/binance.service';
 
 export const paymentRouter = Router();
 
@@ -56,6 +57,30 @@ paymentRouter.post(
     });
 
     res.json({ sessionId: session.id, url: session.url });
+  }),
+);
+
+const binanceDepositSchema = z.object({
+  coin: z.string().min(1).transform((s) => s.toUpperCase()),
+  network: z.string().optional(),
+});
+
+/**
+ * POST /api/payments/binance-deposit-address
+ * Fetches the real Binance deposit address (tied to your Binance ID/API Key)
+ * so users can deposit crypto directly to your account.
+ */
+paymentRouter.post(
+  '/binance-deposit-address',
+  requireAuth,
+  asyncHandler(async (req: AuthedRequest, res) => {
+    const { coin, network } = binanceDepositSchema.parse(req.body);
+    const depositInfo = await getBinanceDepositAddress(coin, network);
+    res.json({
+      success: true,
+      binanceId: '522222635',
+      ...depositInfo,
+    });
   }),
 );
 
