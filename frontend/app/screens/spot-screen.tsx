@@ -12,8 +12,9 @@ import { EmptyState } from "../components/empty-state";
 
 import { Icon, YellowPlus } from "../components/icons";
 import { getTicker, type MarketTicker } from "../lib/api";
+import { P2PScreen } from "./p2p-screen";
 
-const MARKET_TABS = ["Buy/Sell", "Spot", "Stocks", "Prediction", "Margin"];
+const MARKET_TABS = ["Buy/Sell", "Spot", "Stocks", "Prediction", "P2P", "Margin"];
 const ORDER_TABS = ["Open Orders (0)", "Holdings", "Bots"];
 
 export function SpotScreen() {
@@ -26,6 +27,20 @@ export function SpotScreen() {
   const buy = side === "Buy";
   const [ticker, setTicker] = useState<MarketTicker | null>(null);
   useEffect(() => { getTicker(symbol).then(setTicker).catch(() => setTicker(null)); }, [symbol]);
+
+  if (market === "P2P") {
+    return (
+      <div className="relative min-h-full">
+        <TopTabs
+          tabs={MARKET_TABS}
+          active={market}
+          onChange={(next) => setMarket(next)}
+          right={<Icon name="menu" color={colors.muted} />}
+        />
+        <P2PScreen />
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-full">

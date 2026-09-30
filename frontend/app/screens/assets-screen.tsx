@@ -29,6 +29,9 @@ export function AssetsScreen() {
   const [error, setError] = useState<string | null>(null);
 
   // Modals state
+  const [showAddFundsSheet, setShowAddFundsSheet] = useState(false);
+  const [showSelectCurrencyModal, setShowSelectCurrencyModal] = useState(false);
+  const [showSelectMethodModal, setShowSelectMethodModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [showAdminModal, setShowAdminModal] = useState(false);
@@ -69,7 +72,7 @@ export function AssetsScreen() {
 
   const handleActionClick = (label: string) => {
     if (label === "Add Funds") {
-      setShowDepositModal(true);
+      setShowAddFundsSheet(true);
       setSuccessMsg("");
     } else if (label === "Transfer") {
       setShowTransferModal(true);
@@ -419,6 +422,106 @@ export function AssetsScreen() {
                 </button>
               </form>
             )}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Add Funds -> Select Currency -> Select Method Modal */}
+      {showAddFundsSheet ? (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4">
+          <div className="w-full max-w-md bg-[#181A20] rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl border-t sm:border border-[#2B3139]">
+            <div className="w-9 h-1 bg-[#3A4048] rounded-full mx-auto mb-4" />
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-bold text-white">Add Funds</h2>
+              <button onClick={() => setShowAddFundsSheet(false)} className="text-muted hover:text-white">✕</button>
+            </div>
+            <div
+              onClick={() => {
+                setShowAddFundsSheet(false);
+                setShowSelectCurrencyModal(true);
+              }}
+              className="border border-[#2B3139] rounded-xl p-4 flex gap-4 items-center mb-3 bg-[#1E2026] cursor-pointer hover:border-yellow transition-colors"
+            >
+              <span className="text-2xl">⬇️</span>
+              <div>
+                <div className="font-bold text-base text-white mb-0.5">Deposit Asset</div>
+                <div className="text-[#848E9C] text-xs leading-relaxed">Select currency and deposit method (Binance ID: 522222635)</div>
+              </div>
+            </div>
+            <div
+              onClick={() => {
+                setShowAddFundsSheet(false);
+                setShowDepositModal(true);
+              }}
+              className="border border-[#2B3139] rounded-xl p-4 flex gap-4 items-center mb-4 bg-[#1E2026] cursor-pointer hover:border-yellow transition-colors"
+            >
+              <span className="text-2xl">💳</span>
+              <div>
+                <div className="font-bold text-base text-white mb-0.5">Buy with Card / Stripe</div>
+                <div className="text-[#848E9C] text-xs leading-relaxed">Purchase crypto instantly with debit/credit card</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showSelectCurrencyModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-[#181A20] p-6 shadow-2xl border border-[#2B3139]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2B3139]">
+              <h3 className="text-base font-bold text-white">Select Currency</h3>
+              <button onClick={() => setShowSelectCurrencyModal(false)} className="text-muted hover:text-white">✕</button>
+            </div>
+            <div className="mt-4 space-y-2">
+              {["USDT", "BTC", "ETH", "BNB", "SOL"].map((coin) => (
+                <div
+                  key={coin}
+                  onClick={() => {
+                    setDepositAsset(coin);
+                    setShowSelectCurrencyModal(false);
+                    setShowSelectMethodModal(true);
+                  }}
+                  className="flex items-center justify-between p-3 rounded-xl bg-[#1E2026] hover:bg-[#2B3139] cursor-pointer"
+                >
+                  <span className="font-bold text-white">{coin}</span>
+                  <span className="text-muted text-xs">Select ➔</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showSelectMethodModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-[#181A20] p-6 shadow-2xl border border-[#2B3139]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2B3139]">
+              <h3 className="text-base font-bold text-white">Select Method ({depositAsset})</h3>
+              <button onClick={() => setShowSelectMethodModal(false)} className="text-muted hover:text-white">✕</button>
+            </div>
+            <div className="mt-4 space-y-3">
+              <div
+                onClick={() => {
+                  setShowSelectMethodModal(false);
+                  setShowDepositModal(true);
+                }}
+                className="p-4 rounded-xl bg-[#1E2026] border border-[#2B3139] cursor-pointer hover:border-yellow"
+              >
+                <div className="font-bold text-white text-sm">Crypto Network Deposit</div>
+                <div className="text-xs text-muted mt-1">Get deposit address tied to Binance ID: 522222635</div>
+              </div>
+              <div
+                onClick={() => {
+                  setShowSelectMethodModal(false);
+                  setDepositMode("stripe");
+                  setShowDepositModal(true);
+                }}
+                className="p-4 rounded-xl bg-[#1E2026] border border-[#2B3139] cursor-pointer hover:border-yellow"
+              >
+                <div className="font-bold text-white text-sm">Stripe / Card Checkout</div>
+                <div className="text-xs text-muted mt-1">Pay with debit/credit card</div>
+              </div>
+            </div>
           </div>
         </div>
       ) : null}

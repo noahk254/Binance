@@ -217,12 +217,12 @@ export function HomeScreen() {
 
       {/* Add Funds Bottom Sheet (Screen 1 from mockup) */}
       {showAddFundsSheet ? (
-        <div className="absolute inset-0 z-50 flex items-end bg-black/70 backdrop-blur-sm">
-          <div className="w-full bg-[#181A20] rounded-t-2xl p-5 shadow-2xl border-t border-[#2B3139] animate-in slide-in-from-bottom duration-200">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4">
+          <div className="w-full max-w-md bg-[#181A20] rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl border-t sm:border border-[#2B3139] animate-in slide-in-from-bottom duration-200">
             <div className="w-9 h-1 bg-[#3A4048] rounded-full mx-auto mb-4" />
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-xl font-bold text-white">Add Funds</h2>
-              <div className="flex items-center gap-1.5 bg-[#1E2026] px-2.5 py-1.5 rounded-2xl text-xs font-semibold">
+              <div className="flex items-center gap-1.5 bg-[#1E2026] px-3 py-1.5 rounded-2xl text-xs font-semibold">
                 <span className="w-4 h-4 rounded-full bg-[#0ECB81] text-black font-extrabold text-[8px] flex items-center justify-center">KSh</span> KES ⌄
               </div>
             </div>
@@ -232,9 +232,9 @@ export function HomeScreen() {
                 setShowAddFundsSheet(false);
                 setShowP2PView(true);
               }}
-              className="border border-[#2B3139] rounded-xl p-4 flex gap-3.5 items-start mb-3 bg-[#1E2026] cursor-pointer hover:border-yellow transition-colors"
+              className="border border-[#2B3139] rounded-xl p-4 flex gap-4 items-center mb-3 bg-[#1E2026] cursor-pointer hover:border-yellow transition-colors"
             >
-              <span className="text-xl mt-0.5">👥</span>
+              <span className="text-2xl">👥</span>
               <div>
                 <div className="font-bold text-base text-white mb-0.5">P2P Trading</div>
                 <div className="text-[#848E9C] text-xs leading-relaxed">Buy directly from users. Local payment (M-Pesa / Bank)</div>
@@ -246,16 +246,16 @@ export function HomeScreen() {
                 setShowAddFundsSheet(false);
                 setShowDepositModal(true);
               }}
-              className="border border-[#2B3139] rounded-xl p-4 flex gap-3.5 items-start mb-3 bg-[#1E2026] cursor-pointer hover:border-yellow transition-colors"
+              className="border border-[#2B3139] rounded-xl p-4 flex gap-4 items-center mb-4 bg-[#1E2026] cursor-pointer hover:border-yellow transition-colors"
             >
-              <span className="text-xl mt-0.5">⬇️</span>
+              <span className="text-2xl">⬇️</span>
               <div>
                 <div className="font-bold text-base text-white mb-0.5">Deposit Asset</div>
                 <div className="text-[#848E9C] text-xs leading-relaxed">Deposit crypto from other exchanges/wallets to Binance</div>
               </div>
             </div>
 
-            <div className="text-center text-[#848E9C] text-xs pt-1 cursor-pointer" onClick={() => setShowAddFundsSheet(false)}>
+            <div className="text-center text-[#848E9C] text-sm pt-1 cursor-pointer font-semibold" onClick={() => setShowAddFundsSheet(false)}>
               Cancel ⌄
             </div>
           </div>
@@ -264,8 +264,8 @@ export function HomeScreen() {
 
       {/* Deposit Modal */}
       {showDepositModal ? (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-2xl bg-[#181A20] p-6 shadow-2xl border border-[#2B3139]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-[#181A20] p-6 shadow-2xl border border-[#2B3139]">
             <div className="flex items-center justify-between pb-3 border-b border-[#2B3139]">
               <h3 className="text-base font-bold text-white">Deposit Paper Crypto</h3>
               <button onClick={() => setShowDepositModal(false)} className="text-muted hover:text-white">✕</button>
