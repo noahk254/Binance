@@ -7,11 +7,30 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
   const [buysell, setBuysell] = useState<"buy" | "sell">("buy");
   const [selectedAsset, setSelectedAsset] = useState("BTC");
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [showSellModal, setShowSellModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState("All");
   const [merchantName, setMerchantName] = useState("");
   const [merchantPrice, setMerchantPrice] = useState("");
   const [buyAmountKes, setBuyAmountKes] = useState("5000");
+  const [sellAmountKes, setSellAmountKes] = useState("10000");
   const [successMessage, setSuccessMessage] = useState("");
   const [expressAmount, setExpressAmount] = useState("10000");
+
+  const paymentsList = [
+    "All",
+    "Airtel Money",
+    "Bank Transfer",
+    "Co-Operative Bank",
+    "Equity Bank",
+    "M-PESA Kenya",
+    "M-Pesa Paybill",
+    "Access Bank",
+    "Ecobank",
+    "GTBank",
+    "Stanbic Bank",
+    "Standard Chartered",
+  ];
 
   const handleBuyClick = (name: string, price: string) => {
     setMerchantName(name);
@@ -135,7 +154,10 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
                 Buy
               </button>
               <button
-                onClick={() => setBuysell("sell")}
+                onClick={() => {
+                  setBuysell("sell");
+                  setShowSellModal(true);
+                }}
                 className={`flex-1 py-1.5 text-center text-xs font-bold rounded-full transition-colors ${buysell === "sell" ? "bg-[#EAECEF] text-black" : "text-muted"}`}
               >
                 Sell
@@ -150,7 +172,7 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
           <div className="flex items-center gap-3 px-4 py-2 text-xs text-[#EAECEF] overflow-x-auto">
             <span className="flex items-center gap-1 font-semibold text-yellow">₿ {selectedAsset} <span className="text-muted">⌄</span></span>
             <span className="flex items-center gap-1 text-muted">Amount <span className="text-muted">⌄</span></span>
-            <span className="flex items-center gap-1 text-muted">Payment <span className="text-muted">⌄</span></span>
+            <span onClick={() => setShowPaymentModal(true)} className="flex items-center gap-1 text-muted cursor-pointer hover:text-white">Payment ({selectedPayment}) <span className="text-muted">⌄</span></span>
             <span className="flex items-center gap-1 text-muted ml-1"><span className="w-3.5 h-3.5 border border-[#5A6169] rounded-sm inline-block"></span>New</span>
             <span className="ml-auto text-muted">⚙️<span className="text-yellow">●</span></span>
           </div>
@@ -275,6 +297,87 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
                 </button>
               </form>
             )}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Sell Modal */}
+      {showSellModal ? (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-sm p-0 sm:p-4">
+          <div className="w-full max-w-md bg-[#181A20] rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl border border-[#2B3139]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2B3139]">
+              <h3 className="text-base font-bold text-white">I Want to Sell ({selectedAsset})</h3>
+              <button onClick={() => setShowSellModal(false)} className="text-muted hover:text-white">✕</button>
+            </div>
+            <div className="mt-4 space-y-4">
+              <div className="bg-[#1E2026] p-4 rounded-xl flex justify-between items-center border border-[#2B3139]">
+                <input
+                  type="number"
+                  value={sellAmountKes}
+                  onChange={(e) => setSellAmountKes(e.target.value)}
+                  className="bg-transparent text-white text-lg font-bold outline-none w-full"
+                  placeholder="Enter total amount"
+                />
+                <span className="text-muted font-semibold">KES</span>
+              </div>
+              <div className="flex justify-between gap-2">
+                {["2K", "10K", "50K", "100K"].map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => setSellAmountKes(q.replace("K", "000"))}
+                    className="flex-1 border border-[#3A4048] py-2 rounded-lg text-xs font-semibold text-[#ccc] hover:border-yellow"
+                  >
+                    KSh {q}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => setSellAmountKes("0")} className="flex-1 bg-[#2B3139] text-white py-3 rounded-xl font-bold text-sm">
+                  Reset
+                </button>
+                <button onClick={() => { alert(`Sell order for ${sellAmountKes} KES placed!`); setShowSellModal(false); }} className="flex-1 bg-yellow text-black py-3 rounded-xl font-bold text-sm">
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Payment Modal */}
+      {showPaymentModal ? (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-sm p-0 sm:p-4">
+          <div className="w-full max-w-md bg-[#181A20] rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl border border-[#2B3139] max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2B3139]">
+              <h3 className="text-base font-bold text-white">Received With</h3>
+              <button onClick={() => setShowPaymentModal(false)} className="text-muted hover:text-white">✕</button>
+            </div>
+            <div className="my-3 bg-[#1E2026] p-3 rounded-xl text-muted text-xs flex items-center gap-2 border border-[#2B3139]">
+              <span>🔍</span>
+              <input type="text" placeholder="Search payment method" className="bg-transparent text-white outline-none w-full text-xs" />
+            </div>
+            <div className="overflow-y-auto flex-1 space-y-2 pr-1 my-2 grid grid-cols-2 gap-2">
+              {paymentsList.map((p) => (
+                <div
+                  key={p}
+                  onClick={() => { setSelectedPayment(p); setShowPaymentModal(false); }}
+                  className={`p-3 rounded-xl border text-xs font-semibold cursor-pointer transition-colors ${selectedPayment === p ? "border-yellow text-yellow bg-[#2B3139]" : "border-[#2B3139] text-[#ccc] bg-[#1E2026] hover:border-yellow"}`}
+                >
+                  {p}
+                </div>
+              ))}
+            </div>
+            <div className="text-yellow text-xs text-center my-2 cursor-pointer font-semibold">
+              Can&apos;t Find Payment Method?
+            </div>
+            <div className="flex gap-3 pt-2 border-t border-[#2B3139]">
+              <button onClick={() => setSelectedPayment("All")} className="flex-1 bg-[#2B3139] text-white py-3 rounded-xl font-bold text-sm">
+                Reset
+              </button>
+              <button onClick={() => setShowPaymentModal(false)} className="flex-1 bg-yellow text-black py-3 rounded-xl font-bold text-sm">
+                Confirm
+              </button>
+            </div>
           </div>
         </div>
       ) : null}

@@ -265,12 +265,84 @@ export function FuturesScreen() {
           </div>
         </div>
       ) : tab === "Options" ? (
-        <div className="p-4 space-y-4">
-          <h2 className="text-lg font-bold">Crypto Options Chain</h2>
+        <div className="p-4 space-y-4 max-w-lg mx-auto">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-bold text-white">Options</h2>
+          </div>
+
+          <div className="flex gap-6 border-b border-[#2B3139] pb-3 text-sm">
+            <span className="text-white font-bold border-b-2 border-yellow pb-3 -mb-3.5">All</span>
+            <span className="text-[#848E9C] cursor-pointer hover:text-white">Call</span>
+            <span className="text-[#848E9C] cursor-pointer hover:text-white">Put</span>
+          </div>
+
+          <div className="flex justify-between text-xs text-[#848E9C] px-2 pt-2">
+            <span>Bid</span>
+            <span>Strike</span>
+            <span>Ask</span>
+          </div>
+
+          <div className="space-y-1">
+            {[
+              { strike: "2450", bid: "128.0", ask: "0.2" },
+              { strike: "2500", bid: "102.4", ask: "0.2" },
+              { strike: "2525", bid: "90.0", ask: "20.0" },
+              { strike: "2575", bid: "65.4", ask: "0.2" },
+              { strike: "2600", bid: "70.4", ask: "0.2" },
+            ].map((row, i) => (
+              <div key={i} className="flex justify-between items-center bg-[#1E2329] p-3.5 rounded-xl border border-[#2B3139]">
+                <span className="text-[#2EBD85] font-semibold">{row.bid}</span>
+                <span className="text-white font-bold text-base">{row.strike}</span>
+                <span className="text-[#F6465D] font-semibold">{row.ask}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 bg-[#1E2329] p-4 rounded-2xl border border-[#2B3139] text-center space-y-3">
+            <div className="text-sm text-[#848E9C]">Wanna hedge risks?</div>
+            <button onClick={() => alert("Options account activated successfully!")} className="w-full bg-yellow text-black font-bold py-3.5 rounded-xl text-sm shadow-md">
+              Activate Options Account
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="p-4 space-y-4">
-          <h2 className="text-lg font-bold">Smart Money & Whale Flows</h2>
+        <div className="p-4 space-y-4 max-w-lg mx-auto">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-bold text-white">Smart Money</h2>
+          </div>
+
+          <div className="flex gap-6 border-b border-[#2B3139] pb-3 text-sm">
+            <span className="text-[#848E9C] cursor-pointer hover:text-white">Top Traders</span>
+            <span className="text-white font-bold border-b-2 border-yellow pb-3 -mb-3.5">Smart Signal</span>
+          </div>
+
+          <div className="space-y-3">
+            {[
+              { symbol: "ETHUSDT", flow: "16.68M", type: "B", users: 100 },
+              { symbol: "BTCUSDT", flow: "11.43M", type: "B", users: 106 },
+              { symbol: "SOLUSDT", flow: "3.92M", type: "S", users: 114 },
+              { symbol: "XAUUSDT", flow: "3.37M", type: "S", users: 59 },
+              { symbol: "XRPUSDT", flow: "2.70M", type: "S", users: 102 },
+            ].map((item) => (
+              <div key={item.symbol} className="flex justify-between items-center bg-[#1E2329] p-4 rounded-2xl border border-[#2B3139]">
+                <div>
+                  <div className="text-white font-bold text-base">{item.symbol}</div>
+                  <div className="text-[#848E9C] text-xs mt-0.5">Dominant Flow</div>
+                  <div className={`text-sm font-bold mt-1.5 ${item.type === "B" ? "text-[#2EBD85]" : "text-[#F6465D]"}`}>
+                    {item.type} {item.flow} USDT
+                  </div>
+                </div>
+                <div className="text-right">
+                  <button onClick={() => alert(`Viewing signals for ${item.symbol}`)} className="bg-[#2B3139] text-white text-xs px-4 py-2 rounded-lg font-semibold mb-2 hover:bg-[#3A4048]">
+                    View
+                  </button>
+                  <div className="text-[#2EBD85] text-xs font-bold">
+                    👤 {item.users}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
