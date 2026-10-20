@@ -10,6 +10,7 @@ import { ordersRouter } from './routes/orders.routes';
 import { positionsRouter } from './routes/positions.routes';
 import { paymentRouter } from './routes/payment.routes';
 import { adminRouter } from './routes/admin.routes';
+import p2pRouter from './routes/p2p.routes';
 import { errorHandler } from './middleware/error';
 import { attachWebSocketServer } from './ws/server';
 
@@ -36,6 +37,7 @@ app.use('/api/orders', ordersRouter);
 app.use('/api/positions', positionsRouter);
 app.use('/api/payments', paymentRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/p2p', p2pRouter);
 
 // Must be registered last: Express only calls a 4-arg handler as an error handler.
 app.use(errorHandler);

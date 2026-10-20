@@ -62,4 +62,71 @@ db.exec(`
 
   CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id);
   CREATE INDEX IF NOT EXISTS idx_positions_user ON positions(user_id);
+
+  CREATE TABLE IF NOT EXISTS p2p_payment_methods (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type TEXT NOT NULL,
+    account_name TEXT NOT NULL,
+    account_details TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS p2p_ads (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    merchant_name TEXT NOT NULL DEFAULT 'CoinTee',
+    trades INTEGER NOT NULL DEFAULT 3442,
+    completion_rate REAL NOT NULL DEFAULT 99.5,
+    side TEXT NOT NULL CHECK (side IN ('BUY','SELL')),
+    asset TEXT NOT NULL,
+    fiat TEXT NOT NULL,
+    price REAL NOT NULL,
+    total_amount REAL NOT NULL,
+    remaining_amount REAL NOT NULL,
+    min_fiat REAL NOT NULL,
+    max_fiat REAL NOT NULL,
+    payment_window_min INTEGER NOT NULL DEFAULT 15,
+    terms TEXT,
+    status TEXT NOT NULL DEFAULT 'ONLINE' CHECK (status IN ('ONLINE','OFFLINE','CLOSED')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS p2p_ad_payment_methods (
+    ad_id INTEGER NOT NULL REFERENCES p2p_ads(id) ON DELETE CASCADE,
+    payment_method_id INTEGER NOT NULL REFERENCES p2p_payment_methods(id) ON DELETE CASCADE,
+    PRIMARY KEY (ad_id, payment_method_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS p2p_orders (
+    id TEXT PRIMARY KEY,
+    ad_id INTEGER NOT NULL REFERENCES p2p_ads(id),
+    buyer_id INTEGER NOT NULL REFERENCES users(id),
+    seller_id INTEGER NOT NULL REFERENCES users(id),
+    asset TEXT NOT NULL,
+    fiat TEXT NOT NULL,
+    price REAL NOT NULL,
+    crypto_amount REAL NOT NULL,
+    fiat_amount REAL NOT NULL,
+    payment_method_id INTEGER NOT NULL REFERENCES p2p_payment_methods(id),
+    status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING','PAID','COMPLETED','CANCELLED','EXPIRED','DISPUTED')),
+    dispute_reason TEXT,
+    expires_at TEXT NOT NULL,
+    paid_at TEXT,
+    completed_at TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS p2p_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id TEXT NOT NULL REFERENCES p2p_orders(id) ON DELETE CASCADE,
+    sender_id INTEGER NOT NULL REFERENCES users(id),
+    text TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `);
+
+try { db.exec(`ALTER TABLE p2p_ads ADD COLUMN merchant_name TEXT NOT NULL DEFAULT 'CoinTee'`); } catch {}
+try { db.exec(`ALTER TABLE p2p_ads ADD COLUMN trades INTEGER NOT NULL DEFAULT 3442`); } catch {}
+try { db.exec(`ALTER TABLE p2p_ads ADD COLUMN completion_rate REAL NOT NULL DEFAULT 99.5`); } catch {}
+

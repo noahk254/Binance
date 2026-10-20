@@ -1,21 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getBalances, depositFunds, transferFunds, getP2PAds, placeP2POrderApi, type Balance, type P2PAd } from "../lib/api";
 
 export function P2PScreen({ onBack }: { onBack?: () => void }) {
   const [p2pTab, setP2pTab] = useState<"Express" | "P2P" | "Block Trade" | "Lifestyle">("P2P");
   const [buysell, setBuysell] = useState<"buy" | "sell">("buy");
   const [selectedAsset, setSelectedAsset] = useState("BTC");
+  const [selectedFiat, setSelectedFiat] = useState("KES");
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showSellModal, setShowSellModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showFiatModal, setShowFiatModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState("All");
   const [merchantName, setMerchantName] = useState("");
   const [merchantPrice, setMerchantPrice] = useState("");
+  const [selectedAdId, setSelectedAdId] = useState<number | null>(null);
   const [buyAmountKes, setBuyAmountKes] = useState("5000");
   const [sellAmountKes, setSellAmountKes] = useState("10000");
   const [successMessage, setSuccessMessage] = useState("");
   const [expressAmount, setExpressAmount] = useState("10000");
+  const [balances, setBalances] = useState<Balance[]>([]);
+  const [ads, setAds] = useState<P2PAd[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+
+  const fiatCurrencies = ["KES", "GHS", "XOF", "XAF", "UGX"];
 
   const paymentsList = [
     "All",
@@ -32,20 +41,64 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
     "Standard Chartered",
   ];
 
-  const handleBuyClick = (name: string, price: string) => {
-    setMerchantName(name);
-    setMerchantPrice(price);
+  useEffect(() => {
+    getBalances().then(setBalances).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    getP2PAds(buysell, selectedAsset, selectedFiat, selectedPayment)
+      .then(setAds)
+      .catch(() => {});
+  }, [buysell, selectedAsset, selectedFiat, selectedPayment]);
+
+  const handleBuyClick = (ad: P2PAd) => {
+    setSelectedAdId(ad.id);
+    setMerchantName(ad.nickname);
+    setMerchantPrice(String(ad.price));
     setShowCheckoutModal(true);
     setSuccessMessage("");
   };
 
-  const confirmP2POrder = (e: React.FormEvent) => {
+  const confirmP2POrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSuccessMessage(`Successfully placed P2P order with ${merchantName} for ${buyAmountKes} KES! Escrow locked. 📧 Email notification sent.`);
-    setTimeout(() => {
-      setShowCheckoutModal(false);
-      setSuccessMessage("");
-    }, 2500);
+    if (!selectedAdId) return;
+    try {
+      setSubmitting(true);
+      const order = await placeP2POrderApi(selectedAdId, Number(buyAmountKes));
+      const newBalances = await getBalances();
+      setBalances(newBalances);
+      setSuccessMessage(`Successfully placed P2P order (${order.id}) with ${merchantName} for ${buyAmountKes} ${selectedFiat}! ${order.crypto_amount.toFixed(8)} ${selectedAsset} escrow reserved. 📧 Email notification sent.`);
+      setTimeout(() => {
+        setShowCheckoutModal(false);
+        setSuccessMessage("");
+      }, 3000);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "P2P order failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleExpressBuy = async () => {
+    try {
+      const estCrypto = Number(expressAmount) / 10874545;
+      const res = await depositFunds("BTC", estCrypto, `Express P2P Buy (${selectedFiat})`);
+      setBalances(res.balances);
+      alert(`Express buy order for ${expressAmount} ${selectedFiat} (${estCrypto.toFixed(8)} BTC) initiated successfully! Escrow secured & credited to wallet.`);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Express buy failed");
+    }
+  };
+
+  const handleSellConfirm = async () => {
+    try {
+      const res = await transferFunds("USDT", Number(sellAmountKes) / 130, "SPOT", "P2P");
+      setBalances(res.balances);
+      alert(`Sell order for ${sellAmountKes} ${selectedFiat} placed successfully! P2P escrow locked.`);
+      setShowSellModal(false);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Sell order failed");
+    }
   };
 
   return (
@@ -85,7 +138,7 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
                 <div>Payment Method: <span className="text-white font-semibold">M-Pesa / Card</span></div>
               </div>
               <button
-                onClick={() => alert(`Express buy order for ${expressAmount} KES initiated successfully! Escrow secured.`)}
+                onClick={handleExpressBuy}
                 className="w-full bg-yellow text-black font-bold py-3.5 rounded-xl text-sm mt-2"
               >
                 Buy BTC Instantly
@@ -163,8 +216,11 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
                 Sell
               </button>
             </div>
-            <div className="border border-[#2B3139] rounded-lg px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 bg-[#1E2026]">
-              KES <span className="text-muted">⌄</span>
+            <div
+              onClick={() => setShowFiatModal(true)}
+              className="border border-[#2B3139] rounded-lg px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 bg-[#1E2026] cursor-pointer hover:border-yellow"
+            >
+              {selectedFiat} <span className="text-muted">⌄</span>
             </div>
           </div>
 
@@ -177,87 +233,53 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
             <span className="ml-auto text-muted">⚙️<span className="text-yellow">●</span></span>
           </div>
 
-          <div className="px-4 pt-2 pb-1 text-sm font-bold text-text">Promoted Ad</div>
+          <div className="px-4 pt-2 pb-1 text-sm font-bold text-text">P2P Merchants Marketplace ({ads.length})</div>
 
-          {/* Ad Card 1: CoinTee */}
-          <div className="mx-4 mb-3 border border-[#2B3139] rounded-2xl bg-[#181A20] p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-[#EAECEF] text-black flex items-center justify-center font-bold text-xs relative">
-                  C
-                  <span className="absolute bottom-0 right-0 w-2 h-2 bg-green rounded-full border border-[#181A20]" />
+          {ads.length === 0 ? (
+            <div className="text-center py-10 text-muted text-xs">No P2P ads available for {selectedAsset} / {selectedFiat}.</div>
+          ) : (
+            ads.map((ad) => (
+              <div key={ad.id} className="mx-4 mb-3 border border-[#2B3139] rounded-2xl bg-[#181A20] p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full bg-[#EAECEF] text-black flex items-center justify-center font-bold text-xs relative">
+                      {ad.nickname.charAt(0).toUpperCase()}
+                      <span className="absolute bottom-0 right-0 w-2 h-2 bg-green rounded-full border border-[#181A20]" />
+                    </div>
+                    <span className="font-bold text-sm text-white">{ad.nickname}</span>
+                    <span className="w-4 h-4 rounded-full bg-[#7c4dff] text-white text-[9px] flex items-center justify-center">✓</span>
+                  </div>
+                  <span className="text-xs text-muted">{ad.payment_window_min} min 🕐</span>
                 </div>
-                <span className="font-bold text-sm text-white">CoinTee</span>
-                <span className="w-4 h-4 rounded-full bg-[#7c4dff] text-white text-[9px] flex items-center justify-center">✓</span>
-              </div>
-              <span className="text-xs text-muted">15 min 🕐</span>
-            </div>
-            <div className="text-xs text-muted flex gap-2 items-center mb-3">
-              <span className="underline decoration-dotted">Trade:</span> 3442 Trades (99.20%) | 👍 99.64%
-            </div>
-            <div className="flex justify-between items-end mb-3">
-              <div>
-                <div className="text-xs text-muted mb-0.5">Price</div>
-                <div className="text-xs text-muted">KSh <b className="text-lg text-white font-extrabold">11,445,415.30</b> /BTC</div>
-              </div>
-              <div className="text-right">
-                <span className="text-xs text-green block">M-PESA Kenya … ●</span>
-              </div>
-            </div>
-            <div className="flex justify-between items-end pt-2 border-t border-[#2B3139]">
-              <div className="text-xs text-muted leading-relaxed">
-                Limit <b className="text-white">1,000 - 250,000 KES</b><br />
-                Available <b className="text-white">0.03175358 BTC</b>
-              </div>
-              <button
-                onClick={() => handleBuyClick("CoinTee", "11445415.30")}
-                className="bg-[#0ECB81] text-[#0B0E11] font-bold text-xs px-6 py-2 rounded-lg"
-              >
-                Buy BTC
-              </button>
-            </div>
-          </div>
-
-          {/* Ad Card 2: CryptoMerchantKE */}
-          <div className="mx-4 mb-3 border border-[#2B3139] rounded-2xl bg-[#181A20] p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-[#EAECEF] text-black flex items-center justify-center font-bold text-xs relative">
-                  C
-                  <span className="absolute bottom-0 right-0 w-2 h-2 bg-green rounded-full border border-[#181A20]" />
+                <div className="text-xs text-muted flex gap-2 items-center mb-3">
+                  <span className="underline decoration-dotted">Trade:</span> {ad.orders} Trades ({ad.completion_rate}%)
                 </div>
-                <span className="font-bold text-sm text-white">CryptoMerchantKE</span>
-                <span className="w-4 h-4 rounded-full bg-[#b06a2c] text-white text-[9px] flex items-center justify-center">🥇</span>
+                <div className="flex justify-between items-end mb-3">
+                  <div>
+                    <div className="text-xs text-muted mb-0.5">Price</div>
+                    <div className="text-xs text-muted">{ad.fiat} <b className="text-lg text-white font-extrabold">{Number(ad.price).toLocaleString()}</b> /{ad.asset}</div>
+                  </div>
+                  <div className="text-right text-xs text-muted leading-tight">
+                    {ad.payments?.map((p) => (
+                      <span key={p} className="text-green block">{p} … ●</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex justify-between items-end pt-2 border-t border-[#2B3139]">
+                  <div className="text-xs text-muted leading-relaxed">
+                    Limit <b className="text-white">{Number(ad.min_limit).toLocaleString()} - {Number(ad.max_limit).toLocaleString()} {ad.fiat}</b><br />
+                    Available <b className="text-white">{ad.available} {ad.asset}</b>
+                  </div>
+                  <button
+                    onClick={() => handleBuyClick(ad)}
+                    className="bg-[#0ECB81] text-[#0B0E11] font-bold text-xs px-6 py-2 rounded-lg"
+                  >
+                    Buy {ad.asset}
+                  </button>
+                </div>
               </div>
-              <span className="text-xs text-muted">15 min 🕐</span>
-            </div>
-            <div className="text-xs text-muted flex gap-2 items-center mb-3">
-              <span className="underline decoration-dotted">Trade:</span> 301 Trades (100.00%) | 👍 99.59%
-            </div>
-            <div className="flex justify-between items-end mb-3">
-              <div>
-                <div className="text-xs text-muted mb-0.5">Price</div>
-                <div className="text-xs text-muted">KSh <b className="text-lg text-white font-extrabold">11,335,363.23</b> /BTC</div>
-              </div>
-              <div className="text-right text-xs text-muted leading-tight">
-                <span className="text-green block">M-PESA Kenya … ●</span>
-                <span className="text-red block">Airtel Money ●</span>
-                <span className="text-red block">Bank Transfer ●</span>
-              </div>
-            </div>
-            <div className="flex justify-between items-end pt-2 border-t border-[#2B3139]">
-              <div className="text-xs text-muted leading-relaxed">
-                Limit <b className="text-white">10,000 - 100,000 KES</b><br />
-                Available <b className="text-white">0.01477381 BTC</b>
-              </div>
-              <button
-                onClick={() => handleBuyClick("CryptoMerchantKE", "11335363.23")}
-                className="bg-[#0ECB81] text-[#0B0E11] font-bold text-xs px-6 py-2 rounded-lg"
-              >
-                Buy BTC
-              </button>
-            </div>
-          </div>
+            ))
+          )}
         </>
       )}
 
@@ -335,7 +357,7 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
                 <button onClick={() => setSellAmountKes("0")} className="flex-1 bg-[#2B3139] text-white py-3 rounded-xl font-bold text-sm">
                   Reset
                 </button>
-                <button onClick={() => { alert(`Sell order for ${sellAmountKes} KES placed!`); setShowSellModal(false); }} className="flex-1 bg-yellow text-black py-3 rounded-xl font-bold text-sm">
+                <button onClick={handleSellConfirm} className="flex-1 bg-yellow text-black py-3 rounded-xl font-bold text-sm">
                   Confirm
                 </button>
               </div>
@@ -370,13 +392,40 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
             <div className="text-yellow text-xs text-center my-2 cursor-pointer font-semibold">
               Can&apos;t Find Payment Method?
             </div>
-            <div className="flex gap-3 pt-2 border-t border-[#2B3139]">
-              <button onClick={() => setSelectedPayment("All")} className="flex-1 bg-[#2B3139] text-white py-3 rounded-xl font-bold text-sm">
-                Reset
-              </button>
-              <button onClick={() => setShowPaymentModal(false)} className="flex-1 bg-yellow text-black py-3 rounded-xl font-bold text-sm">
-                Confirm
-              </button>
+             <div className="flex gap-3 pt-2 border-t border-[#2B3139]">
+               <button onClick={() => setSelectedPayment("All")} className="flex-1 bg-[#2B3139] text-white py-3 rounded-xl font-bold text-sm">
+                 Reset
+               </button>
+               <button onClick={() => setShowPaymentModal(false)} className="flex-1 bg-yellow text-black py-3 rounded-xl font-bold text-sm">
+                 Confirm
+               </button>
+             </div>
+           </div>
+         </div>
+       ) : null}
+
+      {/* Fiat Currency Modal */}
+      {showFiatModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-[#181A20] p-6 shadow-2xl border border-[#2B3139]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2B3139]">
+              <h3 className="text-base font-bold text-white">Select Fiat Currency</h3>
+              <button onClick={() => setShowFiatModal(false)} className="text-muted hover:text-white">✕</button>
+            </div>
+            <div className="mt-4 space-y-2">
+              {fiatCurrencies.map((fiat) => (
+                <div
+                  key={fiat}
+                  onClick={() => {
+                    setSelectedFiat(fiat);
+                    setShowFiatModal(false);
+                  }}
+                  className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-colors ${selectedFiat === fiat ? "bg-[#2B3139] border border-yellow text-yellow" : "bg-[#1E2026] text-white hover:bg-[#2B3139]"}`}
+                >
+                  <span className="font-bold">{fiat}</span>
+                  <span className="text-xs text-muted">Zero-Fee Zone</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

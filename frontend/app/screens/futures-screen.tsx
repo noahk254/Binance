@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { colors } from "../components/theme";
 import { TopTabs } from "../components/top-tabs";
 import { Icon } from "../components/icons";
-import { getTicker, getBalances, depositFunds, type MarketTicker, type Balance } from "../lib/api";
+import { getTicker, getBalances, depositFunds, placeFuturesOrderApi, getPositionsApi, getOpenOrdersApi, type MarketTicker, type Balance } from "../lib/api";
 
 const MARGIN_TABS = ["USDⓈ-M", "COIN-M", "Options", "Smart"];
 
@@ -34,6 +34,10 @@ export function FuturesScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [favorites, setFavorites] = useState<Set<string>>(new Set(["BTCUSDT"]));
 
+  const [positions, setPositions] = useState<any[]>([]);
+  const [openOrders, setOpenOrders] = useState<any[]>([]);
+  const [posTab, setPosTab] = useState<"Positions" | "Open Orders">("Positions");
+
   const loadData = async () => {
     try {
       const bals = await getBalances();
@@ -43,6 +47,10 @@ export function FuturesScreen() {
       if (orderType === "Limit" && !price && tk) {
         setPrice(tk.lastPrice);
       }
+      const poss = await getPositionsApi();
+      setPositions(poss);
+      const ords = await getOpenOrdersApi("FUTURES");
+      setOpenOrders(ords);
     } catch {}
   };
 
@@ -62,8 +70,22 @@ export function FuturesScreen() {
       alert("Please enter a valid amount");
       return;
     }
-    setSuccessMsg("Futures order placed successfully! 📧 Email notification sent.");
-    setTimeout(() => setSuccessMsg(""), 2000);
+    try {
+      const res = await placeFuturesOrderApi({
+        symbol: `${pair}USDT`,
+        side: side === "buy" ? "BUY" : "SELL",
+        type: orderType.toUpperCase() as "LIMIT" | "MARKET",
+        quantity: amt,
+        price: orderType === "Limit" ? Number(price) : undefined,
+        leverage: lev,
+      });
+      setPositions(await getPositionsApi());
+      setOpenOrders(await getOpenOrdersApi("FUTURES"));
+      setSuccessMsg(`Futures order placed successfully! Position opened/updated. 📧 Email notification sent.`);
+      setTimeout(() => setSuccessMsg(""), 3000);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Futures order failed");
+    }
   };
 
   const filteredContracts = CONTRACTS_USDM.filter((c) => {
@@ -253,15 +275,60 @@ export function FuturesScreen() {
           </div>
 
           {/* Positions / Orders Tab Bar */}
-          <div className="flex justify-between items-center px-4 py-3 border-t border-[#2B3139] mt-3 text-[13.5px] text-[#848E9C]">
-            <span className="text-white font-bold border-b-2 border-yellow pb-2.5">Positions (0)</span>
-            <span>Open Orders (0)</span>
-            <span>Bots</span>
-            <span>🕐</span>
+          <div className="flex items-center gap-6 px-4 py-3 border-t border-[#2B3139] mt-3 text-[13.5px] text-[#848E9C]">
+            <button
+              onClick={() => setPosTab("Positions")}
+              className={`font-bold pb-2.5 ${posTab === "Positions" ? "text-white border-b-2 border-yellow" : "text-[#848E9C]"}`}
+            >
+              Positions ({positions.length})
+            </button>
+            <button
+              onClick={() => setPosTab("Open Orders")}
+              className={`font-bold pb-2.5 ${posTab === "Open Orders" ? "text-white border-b-2 border-yellow" : "text-[#848E9C]"}`}
+            >
+              Open Orders ({openOrders.length})
+            </button>
           </div>
 
-          <div className="px-4 py-2 text-[13px] text-[#848E9C] border-t border-[#2B3139] bg-[#0B0E11]">
-            BTCUSDT Perp Chart ⌃
+          <div className="px-4 py-3 bg-[#0B0E11] space-y-2">
+            {posTab === "Positions" ? (
+              positions.length === 0 ? (
+                <div className="text-xs text-[#848E9C] text-center py-4">No open positions</div>
+              ) : (
+                positions.map((p) => (
+                  <div key={p.id} className="bg-[#181A20] border border-[#2B3139] p-3.5 rounded-xl space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className={`font-bold text-xs px-2 py-0.5 rounded ${p.side === "LONG" ? "bg-green/20 text-green" : "bg-red/20 text-red"}`}>
+                        {p.side} {p.leverage}x
+                      </span>
+                      <span className="font-bold text-white text-xs">{p.symbol}</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-xs text-[#848E9C]">
+                      <div>Size: <span className="text-white font-semibold">{p.quantity}</span></div>
+                      <div>Entry: <span className="text-white font-semibold">{p.entry_price}</span></div>
+                      <div>PnL: <span className={`font-bold ${p.unrealizedPnl >= 0 ? "text-green" : "text-red"}`}>${p.unrealizedPnl?.toFixed(2) ?? "0.00"}</span></div>
+                    </div>
+                  </div>
+                ))
+              )
+            ) : (
+              openOrders.length === 0 ? (
+                <div className="text-xs text-[#848E9C] text-center py-4">No open orders</div>
+              ) : (
+                openOrders.map((o) => (
+                  <div key={o.id} className="bg-[#181A20] border border-[#2B3139] p-3.5 rounded-xl space-y-2 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className={`font-bold ${o.side === "BUY" ? "text-green" : "text-red"}`}>{o.side} {o.type}</span>
+                      <span className="text-white font-semibold">{o.symbol}</span>
+                    </div>
+                    <div className="flex justify-between text-[#848E9C]">
+                      <span>Price: {o.price ?? "Market"}</span>
+                      <span>Qty: {o.quantity}</span>
+                    </div>
+                  </div>
+                ))
+              )
+            )}
           </div>
         </div>
       ) : tab === "Options" ? (
