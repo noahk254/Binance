@@ -53,8 +53,19 @@ function getLocalBalances(): Balance[] {
   if (typeof window === "undefined") return defaultBalances;
   try {
     const raw = localStorage.getItem("binance_mock_balances");
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed: Balance[] = JSON.parse(raw);
+      const hasSol = parsed.some((b) => b.asset === "SOL");
+      const hasTrx = parsed.some((b) => b.asset === "TRX");
+      if (!hasSol || !hasTrx) {
+        if (!hasSol) parsed.push({ user_id: 1, asset: "SOL", free: 45, locked: 0 });
+        if (!hasTrx) parsed.push({ user_id: 1, asset: "TRX", free: 2500, locked: 0 });
+        localStorage.setItem("binance_mock_balances", JSON.stringify(parsed));
+      }
+      return parsed;
+    }
   } catch {}
+  saveLocalBalances(defaultBalances);
   return defaultBalances;
 }
 
