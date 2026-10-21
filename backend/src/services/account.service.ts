@@ -4,15 +4,18 @@ import type { BalanceRow } from '../types';
 
 /** Credits the demo starting balance to a brand-new user. Paper money only. */
 export function seedBalances(userId: number) {
-  const insert = db.prepare(
+  const upsert = db.prepare(
     `INSERT INTO balances (user_id, asset, free, locked) VALUES (?, ?, ?, 0)
-     ON CONFLICT(user_id, asset) DO NOTHING`,
+     ON CONFLICT(user_id, asset) DO UPDATE SET free = CASE WHEN free <= 0 THEN excluded.free ELSE free END`,
   );
-  insert.run(userId, 'USDT', config.seedUsdt);
-  insert.run(userId, 'BTC', config.seedBtc);
+  upsert.run(userId, 'USDT', config.seedUsdt);
+  upsert.run(userId, 'BTC', config.seedBtc);
+  upsert.run(userId, 'SOL', 10);
+  upsert.run(userId, 'TRX', 1000);
 }
 
 export function getBalances(userId: number): BalanceRow[] {
+  seedBalances(userId);
   return db.prepare(`SELECT * FROM balances WHERE user_id = ?`).all(userId) as BalanceRow[];
 }
 

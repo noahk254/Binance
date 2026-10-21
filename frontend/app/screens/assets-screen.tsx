@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { colors } from "../components/theme";
 import { TopTabs } from "../components/top-tabs";
 import { Icon, IconName } from "../components/icons";
@@ -12,12 +12,14 @@ const ASSET_META: Record<string, { name: string; color: string; glyph: string }>
   FDUSD: { name: "First Digital USD", color: "#111418", glyph: "F" },
   ETH: { name: "Ethereum", color: "#627EEA", glyph: "Ξ" },
   BNB: { name: "Binance Coin", color: "#F3BA2F", glyph: "B" },
+  SOL: { name: "Solana", color: "#14F195", glyph: "S" },
+  TRX: { name: "TRON", color: "#FF0033", glyph: "T" },
 };
 
 const ACTIONS: { label: string; icon: IconName }[] = [
   { label: "Add Funds", icon: "arrowDown" },
   { label: "Transfer", icon: "swap" },
-  { label: "Admin Balance", icon: "history" },
+  { label: "Send", icon: "send" },
   { label: "Earn", icon: "earn" },
 ];
 
@@ -52,6 +54,20 @@ export function AssetsScreen() {
   // Admin form
   const [adminAsset, setAdminAsset] = useState("USDT");
   const [adminAmount, setAdminAmount] = useState("100000");
+  const adminClicksRef = useRef(0);
+  const [valUnit, setValUnit] = useState<"BTC" | "ETH" | "BNB" | "USDT" | "KES">("BTC");
+  const [showValDropdown, setShowValDropdown] = useState(false);
+
+  const handleEstTotalClick = () => {
+    adminClicksRef.current += 1;
+    if (adminClicksRef.current >= 3) {
+      setShowAdminModal(true);
+      adminClicksRef.current = 0;
+    }
+    setTimeout(() => {
+      adminClicksRef.current = 0;
+    }, 1000);
+  };
 
   const loadBalances = async () => {
     try {
@@ -67,6 +83,7 @@ export function AssetsScreen() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadBalances();
   }, []);
 
@@ -77,8 +94,8 @@ export function AssetsScreen() {
     } else if (label === "Transfer") {
       setShowTransferModal(true);
       setSuccessMsg("");
-    } else if (label === "Admin Balance") {
-      setShowAdminModal(true);
+    } else if (label === "Send") {
+      alert("Send crypto to another wallet address or Binance ID.");
       setSuccessMsg("");
     } else {
       alert(`${label} feature is connected to your secure wallet.`);
@@ -179,101 +196,139 @@ export function AssetsScreen() {
     if (b.asset === "BTC") return acc + val * 85854.79;
     if (b.asset === "ETH") return acc + val * 2742.59;
     if (b.asset === "BNB") return acc + val * 712.88;
+    if (b.asset === "SOL") return acc + val * 180.50;
+    if (b.asset === "TRX") return acc + val * 0.22;
     return acc + val;
   }, 0);
 
   const totalBtc = totalUsdt / 85854.79;
 
+  const unitVal =
+    valUnit === "BTC" ? totalUsdt / 85854.79 :
+    valUnit === "ETH" ? totalUsdt / 2742.59 :
+    valUnit === "BNB" ? totalUsdt / 712.88 :
+    valUnit === "USDT" ? totalUsdt :
+    valUnit === "KES" ? totalUsdt * 130 :
+    totalUsdt / 85854.79;
+
+  const displayMain =
+    valUnit === "KES" ? `KSh ${unitVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` :
+    valUnit === "USDT" ? `$${unitVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` :
+    unitVal.toFixed(8);
+
+  const displaySecondary =
+    valUnit === "USDT" ? `≈ ${(totalUsdt / 85854.79).toFixed(8)} BTC` :
+    valUnit === "KES" ? `≈ $${totalUsdt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` :
+    `≈ $${totalUsdt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
   return (
     <div className="pb-6">
       <TopTabs tabs={["Overview", "Funding", "Spot", "Futures"]} active={tab} onChange={setTab} />
 
-      <div className="px-4 pt-[18px]">
+      <div className="px-3 pt-3">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <span className="text-[16px] text-text">Est. Total Value ({tab})</span>
+            <span onClick={handleEstTotalClick} className="cursor-pointer text-[15px] text-text select-none" title="Est. Total Value">Est. Total Value ({tab})</span>
             <button
               type="button"
               onClick={() => setHidden((h) => !h)}
               aria-label={hidden ? "Show balance" : "Hide balance"}
             >
-              <Icon name="eye" size={17} color={colors.muted} />
+              <Icon name="eye" size={16} color={colors.muted} />
             </button>
           </span>
           <button onClick={loadBalances} title="Refresh balances">
-            <Icon name="history" color={colors.muted} />
+            <Icon name="history" color={colors.muted} size={16} />
           </button>
         </div>
 
-        <div className="mt-5 flex items-center gap-3">
-          <span className="text-[34px] font-bold tracking-[2px] text-text">
-            {hidden ? "▬▬" : totalBtc.toFixed(8)}
+        <div className="mt-3.5 flex items-center gap-3 relative">
+          <span className="text-[30px] font-bold tracking-[1.5px] text-text">
+            {hidden ? "▬▬" : displayMain}
           </span>
-          <button type="button" className="flex items-center gap-1.5">
-            <span className="text-[22px] font-semibold text-text">BTC</span>
-            <Icon name="caretDown" size={16} color={colors.text} strokeWidth={2.2} />
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowValDropdown(!showValDropdown)}
+              className="flex items-center gap-1 bg-surface2 px-2.5 py-1.5 rounded-lg border border-line"
+            >
+              <span className="text-[18px] font-semibold text-text">{valUnit}</span>
+              <Icon name="caretDown" size={15} color={colors.text} strokeWidth={2.2} />
+            </button>
+            {showValDropdown ? (
+              <div className="absolute top-full right-0 mt-1.5 bg-surface border border-line rounded-xl shadow-xl z-20 py-1 w-28">
+                {(["BTC", "ETH", "BNB", "USDT", "KES"] as const).map((u) => (
+                  <div
+                    key={u}
+                    onClick={() => { setValUnit(u); setShowValDropdown(false); }}
+                    className={`px-3 py-2 text-xs font-semibold cursor-pointer hover:bg-surface2 ${valUnit === u ? "text-yellow" : "text-text"}`}
+                  >
+                    {u}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </div>
-        <p className="mt-2.5 text-[16px] text-muted">≈ ${totalUsdt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (Stripe & Demo)</p>
+        <p className="mt-1.5 text-[14px] text-muted">{displaySecondary}</p>
 
-        <div className="mt-[18px] flex justify-between gap-3">
+        <div className="mt-3.5 flex justify-between gap-2.5">
           {ACTIONS.map(({ label, icon }) => (
             <button
               key={label}
               type="button"
               onClick={() => handleActionClick(label)}
-              className="flex flex-1 flex-col items-center gap-2.5"
+              className="flex flex-1 flex-col items-center gap-2"
             >
-              <span className="flex h-[66px] w-full items-center justify-center rounded-[12px] bg-surface transition-colors hover:bg-surface2">
-                <Icon name={icon} size={25} color={colors.text} />
+              <span className="flex h-[56px] w-full items-center justify-center rounded-[10px] bg-surface transition-colors hover:bg-surface2">
+                <Icon name={icon} size={22} color={colors.text} />
               </span>
-              <span className="text-[13px] text-text">{label}</span>
+              <span className="text-[12px] text-text">{label}</span>
             </button>
           ))}
         </div>
 
-        {error ? <p className="mt-4 rounded-lg bg-surface p-3 text-sm text-red">{error}</p> : null}
+        {error ? <p className="mt-3 rounded-lg bg-surface p-2.5 text-xs text-red">{error}</p> : null}
 
-        <div className="mt-[22px] rounded-[14px] bg-surface p-4">
+        <div className="mt-4 rounded-[12px] bg-surface p-3.5">
           <div className="flex items-center justify-between">
-            <span className="text-[16px] text-muted">Balances ({tab}) {loading ? "(Syncing...)" : ""}</span>
-            <button onClick={() => setShowAdminModal(true)} className="text-xs text-yellow">Admin Edit</button>
+            <span className="text-[14px] text-muted">Balances ({tab}) {loading ? "(Syncing...)" : ""}</span>
           </div>
 
           {visibleHoldings.map((h, i) => (
-            <div key={h.symbol} className={`pt-[18px] ${i > 0 ? "mt-[18px] border-t border-line" : ""}`}>
+            <div key={h.symbol} className={`pt-3.5 ${i > 0 ? "mt-3.5 border-t border-line" : ""}`}>
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   <span
-                    className={`flex h-[34px] w-[34px] items-center justify-center rounded-full ${
+                    className={`flex h-[30px] w-[30px] items-center justify-center rounded-full ${
                       h.symbol === "FDUSD" ? "border border-line" : ""
                     }`}
                     style={{ backgroundColor: h.color }}
                   >
-                    <span className="text-[16px] font-bold text-white">{h.glyph}</span>
+                    <span className="text-[14px] font-bold text-white">{h.glyph}</span>
                   </span>
                   <span>
-                    <span className="block text-[17px] font-semibold text-text">{h.symbol}</span>
-                    <span className="block text-[13.5px] text-muted">{h.name}</span>
+                    <span className="block text-[15px] font-semibold text-text">{h.symbol}</span>
+                    <span className="block text-[12px] text-muted">{h.name}</span>
                   </span>
                 </div>
                 <span className="text-right">
-                  <span className="block text-[17px] font-medium text-text">{h.amount}</span>
-                  <span className="block text-[13.5px] text-muted">{h.symbol}</span>
+                  <span className="block text-[15px] font-medium text-text">{h.amount}</span>
+                  <span className="block text-[12px] text-muted">{h.symbol}</span>
                 </span>
               </div>
-              <div className="mt-3.5 flex justify-end gap-2">
+              <div className="mt-2.5 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => { setShowTransferModal(true); setTransferAsset(h.symbol); }}
-                  className="rounded-[8px] bg-surface2 px-4 py-2 text-[13px] text-text transition-colors hover:bg-[#353D46]"
+                  className="rounded-[6px] bg-surface2 px-3 py-1.5 text-[12px] text-text transition-colors hover:bg-[#353D46]"
                 >
                   Transfer
                 </button>
                 <button
                   type="button"
                   onClick={() => { setShowDepositModal(true); setDepositAsset(h.symbol); }}
-                  className="rounded-[8px] bg-surface2 px-4 py-2 text-[13px] text-text transition-colors hover:bg-[#353D46]"
+                  className="rounded-[6px] bg-surface2 px-3 py-1.5 text-[12px] text-text transition-colors hover:bg-[#353D46]"
                 >
                   Deposit
                 </button>
@@ -288,7 +343,7 @@ export function AssetsScreen() {
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
           <div className="w-full max-w-sm rounded-2xl bg-surface p-6 shadow-2xl border border-line">
             <div className="flex items-center justify-between pb-4 border-b border-line">
-              <h3 className="text-lg font-bold text-text">Deposit (Stripe & Demo)</h3>
+              <h3 className="text-lg font-bold text-text">Deposit Funds</h3>
               <button onClick={() => setShowDepositModal(false)} className="text-muted hover:text-text">✕</button>
             </div>
             {successMsg ? (

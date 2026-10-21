@@ -180,7 +180,7 @@ export async function placeFuturesOrderApi(data: {
   price?: number;
   leverage: number;
   reduceOnly?: boolean;
-}): Promise<any> {
+}): Promise<Record<string, unknown>> {
   const res = await authedFetch(`${API_URL}/api/orders/futures`, {
     method: "POST",
     headers: {
@@ -195,13 +195,13 @@ export async function placeFuturesOrderApi(data: {
   return res.json();
 }
 
-export async function getPositionsApi(): Promise<any[]> {
+export async function getPositionsApi(): Promise<Record<string, unknown>[]> {
   const res = await authedFetch(`${API_URL}/api/positions`);
   if (!res.ok) return [];
   return res.json();
 }
 
-export async function getOpenOrdersApi(market = "FUTURES"): Promise<any[]> {
+export async function getOpenOrdersApi(market = "FUTURES"): Promise<Record<string, unknown>[]> {
   const res = await authedFetch(`${API_URL}/api/orders?market=${market}`);
   if (!res.ok) return [];
   return res.json();
@@ -234,7 +234,7 @@ export async function getP2PAds(tab = "buy", asset = "BTC", fiat = "KES", paymen
   return res.json();
 }
 
-export async function placeP2POrderApi(adId: number, fiatAmount: number): Promise<any> {
+export async function placeP2POrderApi(adId: number, fiatAmount: number): Promise<Record<string, unknown>> {
   const res = await authedFetch(`${API_URL}/api/p2p/orders`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

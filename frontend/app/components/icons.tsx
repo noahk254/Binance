@@ -35,7 +35,8 @@ export type IconName =
   | "close"
   | "filter"
   | "walletCard"
-  | "fullscreen";
+  | "fullscreen"
+  | "send";
 
 const PATHS: Record<IconName, string[]> = {
   search: ["M11 4a7 7 0 100 14 7 7 0 000-14z", "M20 20l-3.6-3.6"],
@@ -122,6 +123,7 @@ const PATHS: Record<IconName, string[]> = {
   filter: ["M3 6h18", "M7 12h10", "M10 18h4"],
   walletCard: ["M21 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2v-2", "M16 12h5v4h-5z"],
   fullscreen: ["M8 3H5a2 2 0 00-2 2v3", "M21 8V5a2 2 0 00-2-2h-3", "M21 16v3a2 2 0 01-2 2h-3", "M3 16v3a2 2 0 002 2h3"],
+  send: ["M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"],
 };
 
 type Props = {

@@ -16,6 +16,25 @@ const CONTRACTS_USDM = [
   { symbol: "XRPUSDT", name: "XRP", vol: "2.00B", price: "1.5028", chg: -7.09, color: "#23292f", glyph: "✕" },
 ];
 
+type Position = {
+  id: number;
+  symbol: string;
+  side: "LONG" | "SHORT";
+  quantity: number;
+  entry_price: number;
+  leverage: number;
+  unrealizedPnl?: number;
+};
+
+type OpenOrder = {
+  id: number;
+  symbol: string;
+  side: "BUY" | "SELL";
+  type: "LIMIT" | "MARKET";
+  price?: number | null;
+  quantity: number;
+};
+
 export function FuturesScreen() {
   const [tab, setTab] = useState("USDⓈ-M");
   const [side, setSide] = useState<"buy" | "sell">("buy");
@@ -34,8 +53,8 @@ export function FuturesScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [favorites, setFavorites] = useState<Set<string>>(new Set(["BTCUSDT"]));
 
-  const [positions, setPositions] = useState<any[]>([]);
-  const [openOrders, setOpenOrders] = useState<any[]>([]);
+  const [positions, setPositions] = useState<Position[]>([]);
+  const [openOrders, setOpenOrders] = useState<OpenOrder[]>([]);
   const [posTab, setPosTab] = useState<"Positions" | "Open Orders">("Positions");
 
   const loadData = async () => {
@@ -47,14 +66,15 @@ export function FuturesScreen() {
       if (orderType === "Limit" && !price && tk) {
         setPrice(tk.lastPrice);
       }
-      const poss = await getPositionsApi();
+      const poss = (await getPositionsApi()) as Position[];
       setPositions(poss);
-      const ords = await getOpenOrdersApi("FUTURES");
+      const ords = (await getOpenOrdersApi("FUTURES")) as OpenOrder[];
       setOpenOrders(ords);
     } catch {}
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
     const interval = setInterval(loadData, 2000);
     return () => clearInterval(interval);
@@ -79,8 +99,8 @@ export function FuturesScreen() {
         price: orderType === "Limit" ? Number(price) : undefined,
         leverage: lev,
       });
-      setPositions(await getPositionsApi());
-      setOpenOrders(await getOpenOrdersApi("FUTURES"));
+      setPositions((await getPositionsApi()) as Position[]);
+      setOpenOrders((await getOpenOrdersApi("FUTURES")) as OpenOrder[]);
       setSuccessMsg(`Futures order placed successfully! Position opened/updated. 📧 Email notification sent.`);
       setTimeout(() => setSuccessMsg(""), 3000);
     } catch (err) {
@@ -306,7 +326,7 @@ export function FuturesScreen() {
                     <div className="grid grid-cols-3 gap-2 text-xs text-[#848E9C]">
                       <div>Size: <span className="text-white font-semibold">{p.quantity}</span></div>
                       <div>Entry: <span className="text-white font-semibold">{p.entry_price}</span></div>
-                      <div>PnL: <span className={`font-bold ${p.unrealizedPnl >= 0 ? "text-green" : "text-red"}`}>${p.unrealizedPnl?.toFixed(2) ?? "0.00"}</span></div>
+                      <div>PnL: <span className={`font-bold ${ (p.unrealizedPnl ?? 0) >= 0 ? "text-green" : "text-red" }`}>${(p.unrealizedPnl ?? 0).toFixed(2)}</span></div>
                     </div>
                   </div>
                 ))

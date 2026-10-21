@@ -9,7 +9,7 @@ function seedDemoP2PIfNeeded() {
   try {
     const count = (db.prepare('SELECT COUNT(*) as c FROM p2p_ads').get() as { c: number }).c;
     const hasCoinTee = (db.prepare('SELECT COUNT(*) as c FROM p2p_ads WHERE merchant_name = ?').get('CoinTee') as { c: number }).c;
-    if (count < 4 || hasCoinTee === 0) {
+    if (count < 10 || hasCoinTee === 0) {
       db.prepare('DELETE FROM p2p_ad_payment_methods').run();
       db.prepare('DELETE FROM p2p_ads').run();
       db.prepare('DELETE FROM p2p_payment_methods').run();
@@ -26,6 +26,12 @@ function seedDemoP2PIfNeeded() {
         { name: 'CryptoMerchantKE', trades: 301, rate: 99.59, price: 11335363.23, min: 10000, max: 100000, avail: 0.01477381, pms: ['M-PESA Kenya', 'Airtel Money', 'Bank Transfer'] },
         { name: 'SavannahTrader', trades: 1250, rate: 99.90, price: 11500000.00, min: 5000, max: 500000, avail: 0.05000000, pms: ['M-PESA Kenya', 'Bank Transfer'] },
         { name: 'AfriP2P', trades: 840, rate: 98.80, price: 11290000.00, min: 2000, max: 150000, avail: 0.02200000, pms: ['M-PESA Kenya', 'Airtel Money'] },
+        { name: 'NairobiExpress', trades: 612, rate: 99.20, price: 11400000.00, min: 1000, max: 200000, avail: 0.04000000, pms: ['M-PESA Kenya'] },
+        { name: 'MombasaCrypto', trades: 415, rate: 99.10, price: 11380000.00, min: 5000, max: 300000, avail: 0.01800000, pms: ['M-PESA Kenya', 'Bank Transfer'] },
+        { name: 'RiftValleyDirect', trades: 930, rate: 99.75, price: 11460000.00, min: 2000, max: 400000, avail: 0.03500000, pms: ['M-PESA Kenya', 'Airtel Money'] },
+        { name: 'AlphaP2P', trades: 1520, rate: 99.85, price: 11420000.00, min: 10000, max: 1000000, avail: 0.08000000, pms: ['M-PESA Kenya', 'Bank Transfer', 'Standard Chartered'] },
+        { name: 'SwahiliTrade', trades: 210, rate: 98.50, price: 11350000.00, min: 500, max: 50000, avail: 0.01000000, pms: ['M-PESA Kenya'] },
+        { name: 'ZambeziGlobal', trades: 789, rate: 99.30, price: 11480000.00, min: 5000, max: 500000, avail: 0.04500000, pms: ['M-PESA Kenya', 'Equity Bank'] },
       ];
 
       for (const m of merchants) {

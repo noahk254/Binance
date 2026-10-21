@@ -23,6 +23,22 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
   const [balances, setBalances] = useState<Balance[]>([]);
   const [ads, setAds] = useState<P2PAd[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [balanceUnit, setBalanceUnit] = useState<"BTC" | "USDT" | "KES">("BTC");
+  const [showBalanceUnitDropdown, setShowBalanceUnitDropdown] = useState(false);
+
+  const totalUsdt = balances.reduce((acc, b) => {
+    const val = Number(b.free) + Number(b.locked);
+    if (b.asset === "USDT" || b.asset === "FDUSD") return acc + val;
+    if (b.asset === "BTC") return acc + val * 108745.45;
+    if (b.asset === "ETH") return acc + val * 2742.59;
+    if (b.asset === "BNB") return acc + val * 712.88;
+    if (b.asset === "SOL") return acc + val * 180.50;
+    if (b.asset === "TRX") return acc + val * 0.22;
+    return acc + val;
+  }, 0);
+
+  const totalBtc = totalUsdt / 108745.45;
+  const totalKes = totalUsdt * 130;
 
   const fiatCurrencies = ["KES", "GHS", "XOF", "XAF", "UGX"];
 
@@ -64,7 +80,10 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
     if (!selectedAdId) return;
     try {
       setSubmitting(true);
-      const order = await placeP2POrderApi(selectedAdId, Number(buyAmountKes));
+      const order = (await placeP2POrderApi(selectedAdId, Number(buyAmountKes))) as {
+        id: string;
+        crypto_amount: number;
+      };
       const newBalances = await getBalances();
       setBalances(newBalances);
       setSuccessMessage(`Successfully placed P2P order (${order.id}) with ${merchantName} for ${buyAmountKes} ${selectedFiat}! ${order.crypto_amount.toFixed(8)} ${selectedAsset} escrow reserved. 📧 Email notification sent.`);
@@ -195,6 +214,47 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
           <div className="flex justify-center gap-1 mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-[#3A4048]"></span>
             <span className="w-1.5 h-1.5 rounded-full bg-[#C9CDD3]"></span>
+          </div>
+
+          {/* Funding Wallet Balance Card with Dropdown */}
+          <div className="mx-4 my-3 bg-[#181A20] border border-[#2B3139] rounded-2xl p-4 flex items-center justify-between">
+            <div>
+              <div className="text-xs text-muted mb-1 flex items-center gap-1.5">
+                <span>Funding Balance</span>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowBalanceUnitDropdown(!showBalanceUnitDropdown)}
+                    className="bg-[#1E2026] text-yellow font-bold px-2 py-0.5 rounded text-xs flex items-center gap-1 border border-[#2B3139]"
+                  >
+                    {balanceUnit} ⌄
+                  </button>
+                  {showBalanceUnitDropdown ? (
+                    <div className="absolute top-full left-0 mt-1 bg-[#1E2026] border border-[#2B3139] rounded-xl shadow-xl z-20 py-1 w-24">
+                      {(["BTC", "USDT", "KES"] as const).map((unit) => (
+                        <div
+                          key={unit}
+                          onClick={() => { setBalanceUnit(unit); setShowBalanceUnitDropdown(false); }}
+                          className={`px-3 py-1.5 text-xs font-semibold cursor-pointer hover:bg-[#2B3139] ${balanceUnit === unit ? "text-yellow" : "text-white"}`}
+                        >
+                          {unit}
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-white tracking-wide">
+                {balanceUnit === "BTC" && `${totalBtc.toFixed(8)} BTC`}
+                {balanceUnit === "USDT" && `$${totalUsdt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT`}
+                {balanceUnit === "KES" && `KSh ${totalKes.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              </div>
+            </div>
+            <button
+              onClick={() => alert("Transfer funds to your P2P Funding wallet.")}
+              className="bg-[#2B3139] hover:bg-[#353D46] text-white font-semibold text-xs px-4 py-2 rounded-xl"
+            >
+              Transfer
+            </button>
           </div>
 
           {/* Buy/Sell Pill & KES */}

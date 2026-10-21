@@ -44,6 +44,8 @@ authRouter.post(
       throw new HttpError(401, 'Invalid email or password');
     }
 
+    seedBalances(user.id);
+
     const token = signToken({ id: user.id, email: user.email });
     res.json({ token, user: { id: user.id, email: user.email } });
   }),
