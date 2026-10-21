@@ -49,27 +49,31 @@ const mockP2PAds: P2PAd[] = [
   { id: 10, side: "SELL", asset: "BTC", fiat: "KES", price: 11480000.00, available: 0.04500000, min_limit: 5000, max_limit: 500000, payment_window_min: 15, terms: "Secure escrow.", nickname: "ZambeziGlobal", orders: 789, completion_rate: 99.30, payments: ["M-PESA Kenya", "Equity Bank"] },
 ];
 
+function ensureSolAndTrx(bals: Balance[]): Balance[] {
+  if (!bals.some((b) => b.asset === "SOL")) {
+    bals.push({ user_id: 1, asset: "SOL", free: 45, locked: 0 });
+  }
+  if (!bals.some((b) => b.asset === "TRX")) {
+    bals.push({ user_id: 1, asset: "TRX", free: 2500, locked: 0 });
+  }
+  return bals;
+}
+
 function getLocalBalances(): Balance[] {
-  if (typeof window === "undefined") return defaultBalances;
-  try {
-    const raw = localStorage.getItem("binance_mock_balances");
-    if (raw) {
-      const parsed: Balance[] = JSON.parse(raw);
-      const hasSol = parsed.some((b) => b.asset === "SOL");
-      const hasTrx = parsed.some((b) => b.asset === "TRX");
-      if (!hasSol || !hasTrx) {
-        if (!hasSol) parsed.push({ user_id: 1, asset: "SOL", free: 45, locked: 0 });
-        if (!hasTrx) parsed.push({ user_id: 1, asset: "TRX", free: 2500, locked: 0 });
-        localStorage.setItem("binance_mock_balances", JSON.stringify(parsed));
+  let bals = [...defaultBalances];
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem("binance_mock_balances");
+      if (raw) {
+        bals = JSON.parse(raw);
       }
-      return parsed;
-    }
-  } catch {}
-  saveLocalBalances(defaultBalances);
-  return defaultBalances;
+    } catch {}
+  }
+  return ensureSolAndTrx(bals);
 }
 
 function saveLocalBalances(bals: Balance[]): Balance[] {
+  ensureSolAndTrx(bals);
   if (typeof window !== "undefined") {
     localStorage.setItem("binance_mock_balances", JSON.stringify(bals));
   }
@@ -167,7 +171,8 @@ export async function getBalances(): Promise<Balance[]> {
   try {
     const res = await authedFetch(`${API_URL}/api/account/balances`);
     if (res.ok) {
-      return res.json() as Promise<Balance[]>;
+      const bals: Balance[] = await res.json();
+      return ensureSolAndTrx(bals);
     }
   } catch {}
   return getLocalBalances();
@@ -181,7 +186,9 @@ export async function depositFunds(asset: string, amount: number, method = "Cred
       body: JSON.stringify({ asset, amount, method }),
     });
     if (res.ok) {
-      return res.json();
+      const data = await res.json();
+      if (data.balances) ensureSolAndTrx(data.balances);
+      return data;
     }
   } catch {}
 
@@ -204,7 +211,9 @@ export async function transferFunds(asset: string, amount: number, from: string,
       body: JSON.stringify({ asset, amount, from, to }),
     });
     if (res.ok) {
-      return res.json();
+      const data = await res.json();
+      if (data.balances) ensureSolAndTrx(data.balances);
+      return data;
     }
   } catch {}
 
@@ -225,7 +234,9 @@ export async function setCustomBalance(asset: string, free: number): Promise<{ b
       body: JSON.stringify({ asset, free }),
     });
     if (res.ok) {
-      return res.json();
+      const data = await res.json();
+      if (data.balances) ensureSolAndTrx(data.balances);
+      return data;
     }
   } catch {}
 
@@ -248,7 +259,9 @@ export async function createStripeCheckout(asset: string, amount: number): Promi
       body: JSON.stringify({ asset, amount }),
     });
     if (res.ok) {
-      return res.json();
+      const data = await res.json();
+      if (data.balances) ensureSolAndTrx(data.balances);
+      return data;
     }
   } catch {}
 
@@ -271,7 +284,9 @@ export async function adminSetBalance(asset: string, free: number): Promise<{ ba
       body: JSON.stringify({ asset, free }),
     });
     if (res.ok) {
-      return res.json();
+      const data = await res.json();
+      if (data.balances) ensureSolAndTrx(data.balances);
+      return data;
     }
   } catch {}
 
