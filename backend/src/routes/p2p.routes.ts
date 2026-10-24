@@ -21,7 +21,7 @@ function seedDemoP2PIfNeeded() {
         merchantId = Number(info.lastInsertRowid);
       }
 
-      const merchants = [
+      const buyMerchants = [
         { name: 'CoinTee', trades: 3442, rate: 99.64, price: 11445415.30, min: 1000, max: 250000, avail: 0.03175358, pms: ['M-PESA Kenya'] },
         { name: 'CryptoMerchantKE', trades: 301, rate: 99.59, price: 11335363.23, min: 10000, max: 100000, avail: 0.01477381, pms: ['M-PESA Kenya', 'Airtel Money', 'Bank Transfer'] },
         { name: 'SavannahTrader', trades: 1250, rate: 99.90, price: 11500000.00, min: 5000, max: 500000, avail: 0.05000000, pms: ['M-PESA Kenya', 'Bank Transfer'] },
@@ -34,7 +34,20 @@ function seedDemoP2PIfNeeded() {
         { name: 'ZambeziGlobal', trades: 789, rate: 99.30, price: 11480000.00, min: 5000, max: 500000, avail: 0.04500000, pms: ['M-PESA Kenya', 'Equity Bank'] },
       ];
 
-      for (const m of merchants) {
+      const sellMerchants = [
+        { name: 'ApexBuyerKE', trades: 1840, rate: 99.80, price: 11400000.00, min: 1000, max: 250000, avail: 0.05, pms: ['M-PESA Kenya'] },
+        { name: 'SavannahP2P', trades: 920, rate: 99.40, price: 11390000.00, min: 2000, max: 150000, avail: 0.04, pms: ['M-PESA Kenya', 'Bank Transfer'] },
+        { name: 'RiftValleyBuyer', trades: 650, rate: 99.10, price: 11380000.00, min: 5000, max: 300000, avail: 0.03, pms: ['M-PESA Kenya', 'Airtel Money'] },
+        { name: 'CoastCryptoBuyer', trades: 410, rate: 98.90, price: 11370000.00, min: 1000, max: 100000, avail: 0.02, pms: ['M-PESA Kenya'] },
+        { name: 'NairobiLiquidity', trades: 2150, rate: 99.95, price: 11360000.00, min: 10000, max: 1000000, avail: 0.1, pms: ['M-PESA Kenya', 'Equity Bank', 'Bank Transfer'] },
+        { name: 'MountKenyaTrader', trades: 780, rate: 99.25, price: 11350000.00, min: 2000, max: 200000, avail: 0.035, pms: ['M-PESA Kenya'] },
+        { name: 'MaraP2PExchange', trades: 1340, rate: 99.60, price: 11340000.00, min: 5000, max: 500000, avail: 0.06, pms: ['M-PESA Kenya', 'Bank Transfer'] },
+        { name: 'JamhuriBuyer', trades: 530, rate: 99.00, price: 11330000.00, min: 1000, max: 150000, avail: 0.025, pms: ['M-PESA Kenya', 'Airtel Money'] },
+        { name: 'UhuruCash', trades: 1120, rate: 99.70, price: 11320000.00, min: 5000, max: 400000, avail: 0.07, pms: ['M-PESA Kenya'] },
+        { name: 'KisumuP2PBuyer', trades: 390, rate: 98.75, price: 11310000.00, min: 500, max: 50000, avail: 0.015, pms: ['M-PESA Kenya', 'Equity Bank'] },
+      ];
+
+      for (const m of buyMerchants) {
         const adInfo = db.prepare(`
           INSERT INTO p2p_ads (
             user_id, merchant_name, trades, completion_rate,
@@ -52,6 +65,35 @@ function seedDemoP2PIfNeeded() {
           'SELL', 'BTC', 'KES', m.price,
           m.avail, m.avail, m.min, m.max,
           15, 'Fast and secure release.', 'ONLINE'
+        );
+
+        const adId = adInfo.lastInsertRowid;
+        for (const pmType of m.pms) {
+          const pmInfo = db.prepare('INSERT INTO p2p_payment_methods (user_id, type, account_name, account_details) VALUES (?, ?, ?, ?)').run(
+            merchantId, pmType, `${m.name} ${pmType}`, '254700000000'
+          );
+          db.prepare('INSERT INTO p2p_ad_payment_methods (ad_id, payment_method_id) VALUES (?, ?)').run(adId, pmInfo.lastInsertRowid);
+        }
+      }
+
+      for (const m of sellMerchants) {
+        const adInfo = db.prepare(`
+          INSERT INTO p2p_ads (
+            user_id, merchant_name, trades, completion_rate,
+            side, asset, fiat, price,
+            total_amount, remaining_amount, min_fiat, max_fiat,
+            payment_window_min, terms, status
+          ) VALUES (
+            ?, ?, ?, ?,
+            ?, ?, ?, ?,
+            ?, ?, ?, ?,
+            ?, ?, ?
+          )
+        `).run(
+          merchantId, m.name, m.trades, m.rate,
+          'BUY', 'BTC', 'KES', m.price,
+          m.avail, m.avail, m.min, m.max,
+          15, 'Fast and secure buyer.', 'ONLINE'
         );
 
         const adId = adInfo.lastInsertRowid;

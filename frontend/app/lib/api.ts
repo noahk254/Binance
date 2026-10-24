@@ -37,6 +37,7 @@ const mockMarkets: MarketTicker[] = [
 ];
 
 const mockP2PAds: P2PAd[] = [
+  // Buy tab (side: SELL - merchants selling to user)
   { id: 1, side: "SELL", asset: "BTC", fiat: "KES", price: 11445415.30, available: 0.03175358, min_limit: 1000, max_limit: 250000, payment_window_min: 15, terms: "Fast and secure release.", nickname: "CoinTee", orders: 3442, completion_rate: 99.64, payments: ["M-PESA Kenya"] },
   { id: 2, side: "SELL", asset: "BTC", fiat: "KES", price: 11335363.23, available: 0.01477381, min_limit: 10000, max_limit: 100000, payment_window_min: 15, terms: "Fast release.", nickname: "CryptoMerchantKE", orders: 301, completion_rate: 99.59, payments: ["M-PESA Kenya", "Airtel Money", "Bank Transfer"] },
   { id: 3, side: "SELL", asset: "BTC", fiat: "KES", price: 11500000.00, available: 0.05000000, min_limit: 5000, max_limit: 500000, payment_window_min: 15, terms: "Verified merchant.", nickname: "SavannahTrader", orders: 1250, completion_rate: 99.90, payments: ["M-PESA Kenya", "Bank Transfer"] },
@@ -47,6 +48,18 @@ const mockP2PAds: P2PAd[] = [
   { id: 8, side: "SELL", asset: "BTC", fiat: "KES", price: 11420000.00, available: 0.08000000, min_limit: 10000, max_limit: 1000000, payment_window_min: 15, terms: "Large volume welcome.", nickname: "AlphaP2P", orders: 1520, completion_rate: 99.85, payments: ["M-PESA Kenya", "Bank Transfer", "Standard Chartered"] },
   { id: 9, side: "SELL", asset: "BTC", fiat: "KES", price: 11350000.00, available: 0.01000000, min_limit: 500, max_limit: 50000, payment_window_min: 15, terms: "Micro trading.", nickname: "SwahiliTrade", orders: 210, completion_rate: 98.50, payments: ["M-PESA Kenya"] },
   { id: 10, side: "SELL", asset: "BTC", fiat: "KES", price: 11480000.00, available: 0.04500000, min_limit: 5000, max_limit: 500000, payment_window_min: 15, terms: "Secure escrow.", nickname: "ZambeziGlobal", orders: 789, completion_rate: 99.30, payments: ["M-PESA Kenya", "Equity Bank"] },
+
+  // Sell tab (side: BUY - buyers buying from user)
+  { id: 11, side: "BUY", asset: "BTC", fiat: "KES", price: 11400000.00, available: 0.05000000, min_limit: 1000, max_limit: 250000, payment_window_min: 15, terms: "Fast payment.", nickname: "ApexBuyerKE", orders: 1840, completion_rate: 99.80, payments: ["M-PESA Kenya"] },
+  { id: 12, side: "BUY", asset: "BTC", fiat: "KES", price: 11390000.00, available: 0.04000000, min_limit: 2000, max_limit: 150000, payment_window_min: 15, terms: "Quick bank / Mpesa.", nickname: "SavannahP2P", orders: 920, completion_rate: 99.40, payments: ["M-PESA Kenya", "Bank Transfer"] },
+  { id: 13, side: "BUY", asset: "BTC", fiat: "KES", price: 11380000.00, available: 0.03000000, min_limit: 5000, max_limit: 300000, payment_window_min: 15, terms: "Ready to pay.", nickname: "RiftValleyBuyer", orders: 650, completion_rate: 99.10, payments: ["M-PESA Kenya", "Airtel Money"] },
+  { id: 14, side: "BUY", asset: "BTC", fiat: "KES", price: 11370000.00, available: 0.02000000, min_limit: 1000, max_limit: 100000, payment_window_min: 15, terms: "Instant transfer.", nickname: "CoastCryptoBuyer", orders: 410, completion_rate: 98.90, payments: ["M-PESA Kenya"] },
+  { id: 15, side: "BUY", asset: "BTC", fiat: "KES", price: 11360000.00, available: 0.10000000, min_limit: 10000, max_limit: 1000000, payment_window_min: 15, terms: "High volume buyer.", nickname: "NairobiLiquidity", orders: 2150, completion_rate: 99.95, payments: ["M-PESA Kenya", "Equity Bank", "Bank Transfer"] },
+  { id: 16, side: "BUY", asset: "BTC", fiat: "KES", price: 11350000.00, available: 0.03500000, min_limit: 2000, max_limit: 200000, payment_window_min: 15, terms: "Trusted buyer.", nickname: "MountKenyaTrader", orders: 780, completion_rate: 99.25, payments: ["M-PESA Kenya"] },
+  { id: 17, side: "BUY", asset: "BTC", fiat: "KES", price: 11340000.00, available: 0.06000000, min_limit: 5000, max_limit: 500000, payment_window_min: 15, terms: "Fast escrow release.", nickname: "MaraP2PExchange", orders: 1340, completion_rate: 99.60, payments: ["M-PESA Kenya", "Bank Transfer"] },
+  { id: 18, side: "BUY", asset: "BTC", fiat: "KES", price: 11330000.00, available: 0.02500000, min_limit: 1000, max_limit: 150000, payment_window_min: 15, terms: "Secure transaction.", nickname: "JamhuriBuyer", orders: 530, completion_rate: 99.00, payments: ["M-PESA Kenya", "Airtel Money"] },
+  { id: 19, side: "BUY", asset: "BTC", fiat: "KES", price: 11320000.00, available: 0.07000000, min_limit: 5000, max_limit: 400000, payment_window_min: 15, terms: "Online now.", nickname: "UhuruCash", orders: 1120, completion_rate: 99.70, payments: ["M-PESA Kenya"] },
+  { id: 20, side: "BUY", asset: "BTC", fiat: "KES", price: 11310000.00, available: 0.01500000, min_limit: 500, max_limit: 50000, payment_window_min: 15, terms: "Fast pay.", nickname: "KisumuP2PBuyer", orders: 390, completion_rate: 98.75, payments: ["M-PESA Kenya", "Equity Bank"] },
 ];
 
 function ensureAllAssets(bals: Balance[]): Balance[] {
@@ -379,7 +392,8 @@ export async function getP2PAds(tab = "buy", asset = "BTC", fiat = "KES", paymen
       return res.json();
     }
   } catch {}
-  return mockP2PAds.filter((ad) => ad.asset === asset && ad.fiat === fiat && (payment === "All" || ad.payments.includes(payment)));
+  const targetSide = tab === "buy" ? "SELL" : "BUY";
+  return mockP2PAds.filter((ad) => ad.asset === asset && ad.fiat === fiat && ad.side === targetSide && (payment === "All" || ad.payments.includes(payment)));
 }
 
 export async function placeP2POrderApi(adId: number, fiatAmount: number): Promise<Record<string, unknown>> {
