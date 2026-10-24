@@ -23,6 +23,8 @@ export function HomeScreen() {
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [depositAmount, setDepositAmount] = useState("1000");
   const [depositAsset, setDepositAsset] = useState("USDT");
+  const [valUnit, setValUnit] = useState<"BTC" | "ETH" | "BNB" | "USDT" | "KES">("BTC");
+  const [showValDropdown, setShowValDropdown] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
   const loadBalances = async () => {
@@ -49,10 +51,29 @@ export function HomeScreen() {
     const val = b.free + b.locked;
     if (b.asset === "BTC") return acc + val * 85854.79;
     if (b.asset === "ETH") return acc + val * 2742.59;
+    if (b.asset === "BNB") return acc + val * 712.88;
+    if (b.asset === "SOL") return acc + val * 180.50;
+    if (b.asset === "TRX") return acc + val * 0.22;
     return acc + val;
   }, 0);
 
-  const totalBtc = totalUsdt / 85854.79;
+  const unitVal =
+    valUnit === "BTC" ? totalUsdt / 85854.79 :
+    valUnit === "ETH" ? totalUsdt / 2742.59 :
+    valUnit === "BNB" ? totalUsdt / 712.88 :
+    valUnit === "USDT" ? totalUsdt :
+    valUnit === "KES" ? totalUsdt * 129.5 :
+    totalUsdt / 85854.79;
+
+  const displayMain =
+    valUnit === "KES" ? `KSh ${unitVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` :
+    valUnit === "USDT" ? `$${unitVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` :
+    unitVal.toFixed(8);
+
+  const displaySecondary =
+    valUnit === "USDT" ? `≈ ${(totalUsdt / 85854.79).toFixed(8)} BTC` :
+    valUnit === "KES" ? `≈ $${totalUsdt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` :
+    `≈ KSh ${(totalUsdt * 129.5).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const handleShortcutClick = (label: string) => {
     if (label === "Stocks" || label === "Earn" || label === "Traders League" || label === "Rewards Hub" || label === "More") {
@@ -125,14 +146,37 @@ export function HomeScreen() {
       <div className="px-4">
         <div className="flex items-start justify-between mt-1.5">
           <div>
-            <div className="flex items-center gap-1 text-[#848E9C] text-[13px]">
-              Est. Total Value(BTC) <span className="text-xs">⌃</span>
+            <div className="flex items-center gap-1.5 text-[#848E9C] text-[13px]">
+              <span>Est. Total Value</span>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowValDropdown(!showValDropdown)}
+                  className="flex items-center gap-1 bg-[#1E2026] px-2 py-0.5 rounded text-white text-xs border border-[#2B3139]"
+                >
+                  <span>({valUnit})</span>
+                  <Icon name="caretDown" size={12} color="#848E9C" strokeWidth={2} />
+                </button>
+                {showValDropdown ? (
+                  <div className="absolute top-full left-0 mt-1.5 bg-[#181A20] border border-[#2B3139] rounded-xl shadow-xl z-20 py-1 w-28">
+                    {(["BTC", "ETH", "BNB", "USDT", "KES"] as const).map((u) => (
+                      <div
+                        key={u}
+                        onClick={() => { setValUnit(u); setShowValDropdown(false); }}
+                        className={`px-3 py-2 text-xs font-semibold cursor-pointer hover:bg-[#2B3139] ${valUnit === u ? "text-[#F0B90B]" : "text-white"}`}
+                      >
+                        {u}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
             </div>
             <div className="text-[32px] font-bold text-white mt-1.5 tracking-wide">
-              {totalBtc.toFixed(9)}
+              {displayMain}
             </div>
             <div className="text-[#848E9C] text-[13px] mt-1">
-              ≈KSh{(totalUsdt * 129.5).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {displaySecondary}
             </div>
             <div className="text-[13px] text-[#848E9C] mt-1">
               Today&apos;s PNL <span className="text-[#0ECB81] font-semibold">+KSh142.50 (+0.56%)</span> ⌄

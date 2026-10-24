@@ -49,12 +49,20 @@ const mockP2PAds: P2PAd[] = [
   { id: 10, side: "SELL", asset: "BTC", fiat: "KES", price: 11480000.00, available: 0.04500000, min_limit: 5000, max_limit: 500000, payment_window_min: 15, terms: "Secure escrow.", nickname: "ZambeziGlobal", orders: 789, completion_rate: 99.30, payments: ["M-PESA Kenya", "Equity Bank"] },
 ];
 
-function ensureSolAndTrx(bals: Balance[]): Balance[] {
-  if (!bals.some((b) => b.asset === "SOL")) {
-    bals.push({ user_id: 1, asset: "SOL", free: 45, locked: 0 });
-  }
-  if (!bals.some((b) => b.asset === "TRX")) {
-    bals.push({ user_id: 1, asset: "TRX", free: 2500, locked: 0 });
+function ensureAllAssets(bals: Balance[]): Balance[] {
+  const required: Record<string, number> = {
+    USDT: 50000,
+    BTC: 0.15,
+    ETH: 2.5,
+    BNB: 12,
+    SOL: 45,
+    TRX: 2500,
+    FDUSD: 1000,
+  };
+  for (const [asset, defaultFree] of Object.entries(required)) {
+    if (!bals.some((b) => b.asset === asset)) {
+      bals.push({ user_id: 1, asset, free: defaultFree, locked: 0 });
+    }
   }
   return bals;
 }
@@ -69,11 +77,11 @@ function getLocalBalances(): Balance[] {
       }
     } catch {}
   }
-  return ensureSolAndTrx(bals);
+  return ensureAllAssets(bals);
 }
 
 function saveLocalBalances(bals: Balance[]): Balance[] {
-  ensureSolAndTrx(bals);
+  ensureAllAssets(bals);
   if (typeof window !== "undefined") {
     localStorage.setItem("binance_mock_balances", JSON.stringify(bals));
   }
@@ -172,7 +180,7 @@ export async function getBalances(): Promise<Balance[]> {
     const res = await authedFetch(`${API_URL}/api/account/balances`);
     if (res.ok) {
       const bals: Balance[] = await res.json();
-      return ensureSolAndTrx(bals);
+      return ensureAllAssets(bals);
     }
   } catch {}
   return getLocalBalances();
@@ -187,7 +195,7 @@ export async function depositFunds(asset: string, amount: number, method = "Cred
     });
     if (res.ok) {
       const data = await res.json();
-      if (data.balances) ensureSolAndTrx(data.balances);
+      if (data.balances) ensureAllAssets(data.balances);
       return data;
     }
   } catch {}
@@ -212,7 +220,7 @@ export async function transferFunds(asset: string, amount: number, from: string,
     });
     if (res.ok) {
       const data = await res.json();
-      if (data.balances) ensureSolAndTrx(data.balances);
+      if (data.balances) ensureAllAssets(data.balances);
       return data;
     }
   } catch {}
@@ -235,7 +243,7 @@ export async function setCustomBalance(asset: string, free: number): Promise<{ b
     });
     if (res.ok) {
       const data = await res.json();
-      if (data.balances) ensureSolAndTrx(data.balances);
+      if (data.balances) ensureAllAssets(data.balances);
       return data;
     }
   } catch {}
@@ -260,7 +268,7 @@ export async function createStripeCheckout(asset: string, amount: number): Promi
     });
     if (res.ok) {
       const data = await res.json();
-      if (data.balances) ensureSolAndTrx(data.balances);
+      if (data.balances) ensureAllAssets(data.balances);
       return data;
     }
   } catch {}
@@ -285,7 +293,7 @@ export async function adminSetBalance(asset: string, free: number): Promise<{ ba
     });
     if (res.ok) {
       const data = await res.json();
-      if (data.balances) ensureSolAndTrx(data.balances);
+      if (data.balances) ensureAllAssets(data.balances);
       return data;
     }
   } catch {}

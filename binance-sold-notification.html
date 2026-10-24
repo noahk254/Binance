@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="color-scheme: dark;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Binance - Sale Complete</title>
+<style>
+  :root {
+    --bg: #181a20;
+    --surface: #2b313a;
+    --surface-hover: #363c4e;
+    --ink: #ffffff;
+    --muted: #848e9c;
+    --accent: #fcd535;
+    --accent-ink: #181a20;
+    --ok: #0ecb81;
+    --line: #33383f;
+    box-sizing: border-box;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .app-container {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--bg);
+    padding: 16px 20px 24px;
+  }
+  /* Notification Toast */
+  .notification-toast {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    position: relative;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .notif-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(252, 213, 53, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .notif-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .notif-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .notif-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .notif-body {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+    margin: 0;
+    word-break: break-word;
+  }
+  .notif-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 0 0 8px;
+  }
+  .notif-close:hover {
+    color: var(--ink);
+  }
+
+  /* Top Navigation */
+  .top {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .close {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .close:hover {
+    background: var(--surface-hover);
+  }
+
+  /* Result Section */
+  .result {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 24px;
+    text-align: center;
+  }
+  .tick {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: rgba(14, 203, 129, 0.1);
+    display: grid;
+    place-items: center;
+  }
+  .tick span {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--ok);
+    display: grid;
+    place-items: center;
+  }
+  .tick svg {
+    width: 36px;
+    height: 36px;
+    stroke: #181a20;
+    stroke-width: 3.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    animation: draw 0.5s 0.15s ease-out forwards;
+  }
+  @keyframes draw {
+    to { stroke-dashoffset: 0; }
+  }
+  .amount {
+    font-size: 36px;
+    font-weight: 700;
+    margin: 24px 0 6px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .status {
+    color: var(--muted);
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  /* Actions */
+  .actions {
+    display: grid;
+    gap: 12px;
+    margin-top: 32px;
+  }
+  .btn {
+    border: 0;
+    border-radius: 12px;
+    padding: 15px;
+    font: inherit;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    text-align: center;
+    transition: opacity 0.2s;
+  }
+  .btn:hover {
+    opacity: 0.9;
+  }
+  .primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .secondary {
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .secondary:hover {
+    background: var(--surface-hover);
+  }
+</style>
+</head>
+<body>
+<div class="app-container">
+  <!-- Notification Toast -->
+  <div class="notification-toast" id="notificationToast">
+    <div class="notif-icon">
+      <svg viewBox="0 0 24 24" fill="#FCD535" width="20" height="20">
+        <path d="M12 0L9.086 2.914L12 5.828L14.914 2.914L12 0ZM3.914 8.086L1 11L3.914 13.914L6.828 11L3.914 8.086ZM20.086 8.086L17.172 11L20.086 13.914L23 11L20.086 8.086ZM12 6.828L6.828 12L12 17.172L17.172 12L12 6.828ZM12 18.172L9.086 21.086L12 24L14.914 21.086L12 18.172Z"/>
+      </svg>
+    </div>
+    <div class="notif-content">
+      <div class="notif-header">
+        <span class="notif-title" id="notifTitle">You have received a payment (20:42)</span>
+      </div>
+      <p class="notif-body" id="notifBody">You have received a payment of 30 USDT from In Jesus Name on 2026-10-23 17:42:48(UTC)</p>
+    </div>
+    <button class="notif-close" onclick="document.getElementById('notificationToast').style.display='none'" aria-label="Close notification">×</button>
+  </div>
+
+  <div class="top">
+    <button class="close" aria-label="Close">×</button>
+  </div>
+
+  <section class="result">
+    <div class="tick" aria-hidden="true">
+      <span>
+        <svg viewBox="0 0 38 38"><path d="M8 20l8 8 14-16"></path></svg>
+      </span>
+    </div>
+    <p class="amount" id="amount">30.00 USDT</p>
+    <p class="status" id="status">Sold 30 USDT</p>
+  </section>
+
+  <div class="actions">
+    <button class="btn primary">View wallet</button>
+    <button class="btn secondary">Order details</button>
+  </div>
+</div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const sender = params.get('sender') || 'In Jesus Name';
+  const amount = params.get('amount') || '30.00';
+  const asset = params.get('asset') || 'USDT';
+  const qty = params.get('qty') || '30';
+
+  const now = new Date();
+  const yr = now.getUTCFullYear();
+  const mo = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const da = String(now.getUTCDate()).padStart(2, '0');
+  const hr = String(now.getUTCHours()).padStart(2, '0');
+  const mi = String(now.getUTCMinutes()).padStart(2, '0');
+  const se = String(now.getUTCSeconds()).padStart(2, '0');
+
+  const timeShort = `${hr}:${mi}`;
+  const timeFull = `${yr}-${mo}-${da} ${hr}:${mi}:${se}(UTC)`;
+
+  document.getElementById("amount").textContent = `${amount} ${asset}`;
+  document.getElementById("status").textContent = `Sold ${qty} ${asset}`;
+
+  document.getElementById("notifTitle").textContent = `You have received a payment (${timeShort})`;
+  document.getElementById("notifBody").textContent = `You have received a payment of ${qty} ${asset} from ${sender} on ${timeFull}`;
+</script>
+</body>
+</html>
