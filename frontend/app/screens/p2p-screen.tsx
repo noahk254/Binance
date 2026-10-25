@@ -160,7 +160,7 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
                 onClick={handleExpressBuy}
                 className="w-full bg-yellow text-black font-bold py-3.5 rounded-xl text-sm mt-2"
               >
-                Buy BTC Instantly
+                Buy Instantly
               </button>
             </div>
           </div>
@@ -332,9 +332,9 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
                   </div>
                   <button
                     onClick={() => handleBuyClick(ad)}
-                    className="bg-[#0ECB81] text-[#0B0E11] font-bold text-xs px-6 py-2 rounded-lg"
+                    className={`font-bold text-xs px-6 py-2 rounded-lg ${buysell === "buy" ? "bg-[#0ECB81] text-[#0B0E11]" : "bg-[#F6465D] text-white"}`}
                   >
-                    Buy {ad.asset}
+                    {buysell === "buy" ? "Buy" : "Sell"}
                   </button>
                 </div>
               </div>
@@ -348,7 +348,9 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
           <div className="w-full max-w-sm rounded-2xl bg-[#181A20] p-6 shadow-2xl border border-[#2B3139]">
             <div className="flex items-center justify-between pb-3 border-b border-[#2B3139]">
-              <h3 className="text-base font-bold text-white">Buy {selectedAsset} from {merchantName}</h3>
+              <h3 className="text-base font-bold text-white">
+                {buysell === "buy" ? `Buy ${selectedAsset} from ${merchantName}` : `Sell ${selectedAsset} to ${merchantName}`}
+              </h3>
               <button onClick={() => setShowCheckoutModal(false)} className="text-muted hover:text-white">✕</button>
             </div>
             {successMessage ? (
@@ -361,7 +363,9 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
                   Unit Price: <span className="text-yellow font-bold">KSh {merchantPrice}</span>
                 </div>
                 <div>
-                  <label className="block text-xs text-muted mb-1">I want to pay (KES)</label>
+                  <label className="block text-xs text-muted mb-1">
+                    {buysell === "buy" ? "I want to pay (KES)" : "I want to sell (KES)"}
+                  </label>
                   <input
                     type="number"
                     value={buyAmountKes}
@@ -372,10 +376,15 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
                 </div>
                 <div className="rounded-xl bg-[#1E2026] p-3 text-xs text-muted space-y-1">
                   <div>Payment Method: <span className="text-white font-semibold">M-PESA Kenya</span></div>
-                  <div>Estimated Receive: <span className="text-green font-semibold">{(Number(buyAmountKes) / Number(merchantPrice)).toFixed(8)} {selectedAsset}</span></div>
+                  <div>
+                    {buysell === "buy" ? "Estimated Receive" : "Estimated Send"}: <span className="text-green font-semibold">{(Number(buyAmountKes) / Number(merchantPrice)).toFixed(8)} {selectedAsset}</span>
+                  </div>
                 </div>
-                <button type="submit" className="w-full rounded-xl bg-[#0ECB81] py-3 font-bold text-black text-sm">
-                  Confirm Purchase (P2P Escrow)
+                <button
+                  type="submit"
+                  className={`w-full rounded-xl py-3 font-bold text-sm ${buysell === "buy" ? "bg-[#0ECB81] text-black" : "bg-[#F6465D] text-white"}`}
+                >
+                  {buysell === "buy" ? "Confirm Purchase (P2P Escrow)" : "Confirm Sale (P2P Escrow)"}
                 </button>
               </form>
             )}
