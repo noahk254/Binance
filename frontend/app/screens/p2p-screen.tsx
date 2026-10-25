@@ -144,47 +144,47 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
         >×</button>
 
         {/* Transaction success */}
-        <section className="pt-[140px] text-center px-5">
-          <div className="w-[154px] h-[154px] mx-auto mb-[48px] border-4 border-[#2dbd8b] rounded-full flex items-center justify-center">
-            <svg viewBox="0 0 100 100" className="w-[116px] h-[116px]">
+        <section className="pt-[100px] text-center px-5">
+          <div className="w-[110px] h-[110px] mx-auto mb-[28px] border-4 border-[#2dbd8b] rounded-full flex items-center justify-center">
+            <svg viewBox="0 0 100 100" className="w-[84px] h-[84px]">
               <circle cx="50" cy="50" r="39" fill="#2DBD8B" />
               <path d="M29 51 L43 65 L70 36" fill="none" stroke="#202630" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <h1 className="mb-[24px] text-[40px] font-extrabold tracking-tight">KSh {buyAmountKes ? Number(buyAmountKes).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : "3,871.74"}</h1>
-          <p className="text-[#9ba3b2] text-[22px]">Successfully sold {buyAmountKes && merchantPrice ? (Number(buyAmountKes) / Number(merchantPrice)).toFixed(2) : "30"} {selectedAsset}</p>
+          <h1 className="mb-[14px] text-[28px] font-extrabold tracking-tight">KSh {buyAmountKes ? Number(buyAmountKes).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : "3,871.74"}</h1>
+          <p className="text-[#9ba3b2] text-[16px]">Successfully sold {buyAmountKes && merchantPrice ? (Number(buyAmountKes) / Number(merchantPrice)).toFixed(2) : "30"} {selectedAsset}</p>
         </section>
 
         {/* Rewards section */}
-        <section className="mx-[29px] my-[60px] p-[25px_22px_29px] bg-[#2a323f] rounded-[22px]">
-          <h2 className="mb-[24px] text-[#aeb5c2] text-[22px] font-extrabold text-left">Get Rewards</h2>
-          <div className="flex items-center gap-[14px]">
-            <div className="w-[62px] h-[62px] flex-shrink-0 border-2 border-[#80a72d] rounded-full bg-[#4c861c] text-white flex items-center justify-center text-[10px] font-extrabold">NVIDIA</div>
-            <p className="flex-1 text-[18px] leading-[1.4] font-bold text-left">
+        <section className="mx-[24px] my-[30px] p-[20px_18px] bg-[#2a323f] rounded-[18px]">
+          <h2 className="mb-[16px] text-[#aeb5c2] text-[16px] font-extrabold text-left">Get Rewards</h2>
+          <div className="flex items-center gap-[12px]">
+            <div className="w-[50px] h-[50px] flex-shrink-0 border-2 border-[#80a72d] rounded-full bg-[#4c861c] text-white flex items-center justify-center text-[9px] font-extrabold">NVIDIA</div>
+            <p className="flex-1 text-[14px] leading-[1.4] font-bold text-left">
               Unlock $1 NVDAB Token Voucher with Stock Options
             </p>
             <button
-              className="p-[13px_16px] border-none rounded-[9px] bg-[#323b47] text-white text-[16px] font-bold cursor-pointer"
+              className="p-[10px_14px] border-none rounded-[8px] bg-[#323b47] text-white text-[14px] font-bold cursor-pointer"
               onClick={() => alert("Your rewards page would open here.")}
             >Go</button>
           </div>
         </section>
 
         {/* Bottom buttons */}
-        <footer className="sticky bottom-0 w-full px-[29px] pb-[max(30px,env(safe-area-inset-bottom))] flex flex-col gap-[18px] bg-[#202630] pt-4">
+        <footer className="sticky bottom-0 w-full px-[24px] pb-[max(20px,env(safe-area-inset-bottom))] flex flex-col gap-[12px] bg-[#202630] pt-3">
           <button
-            className="w-full min-h-[68px] border-none rounded-[13px] bg-[#fcd535] text-[#181b20] text-[22px] font-bold cursor-pointer"
+            className="w-full min-h-[52px] border-none rounded-[12px] bg-[#fcd535] text-[#181b20] text-[16px] font-bold cursor-pointer"
             onClick={() => { setShowSaleSuccess(false); if (onBack) onBack(); }}
           >
             View assets
           </button>
           <button
-            className="w-full min-h-[68px] border-none rounded-[13px] bg-[#323b47] text-[#f5f6fa] text-[22px] font-bold cursor-pointer"
+            className="w-full min-h-[52px] border-none rounded-[12px] bg-[#323b47] text-[#f5f6fa] text-[16px] font-bold cursor-pointer"
             onClick={() => alert("Order Details\n\nStatus: Successful\nSold: 30 " + selectedAsset + "\nReceived: KSh " + (buyAmountKes || "3,871.74"))}
           >
             Order details
           </button>
-          <div className="w-[135px] h-[5px] rounded-[20px] bg-[#777982] mx-auto mt-1 mb-1"></div>
+          <div className="w-[120px] h-[4px] rounded-[20px] bg-[#777982] mx-auto mt-1 mb-1"></div>
         </footer>
       </div>
     );
