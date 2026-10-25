@@ -25,6 +25,7 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
   const [submitting, setSubmitting] = useState(false);
   const [balanceUnit, setBalanceUnit] = useState<"BTC" | "USDT" | "KES">("BTC");
   const [showBalanceUnitDropdown, setShowBalanceUnitDropdown] = useState(false);
+  const [showSaleSuccess, setShowSaleSuccess] = useState(false);
 
   const totalUsdt = balances.reduce((acc, b) => {
     const val = Number(b.free) + Number(b.locked);
@@ -86,11 +87,16 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
       };
       const newBalances = await getBalances();
       setBalances(newBalances);
-      setSuccessMessage(`Successfully placed P2P order (${order.id}) with ${merchantName} for ${buyAmountKes} ${selectedFiat}! ${order.crypto_amount.toFixed(8)} ${selectedAsset} escrow reserved. 📧 Email notification sent.`);
-      setTimeout(() => {
-        setShowCheckoutModal(false);
-        setSuccessMessage("");
-      }, 3000);
+      setShowCheckoutModal(false);
+      if (buysell === "sell") {
+        setShowSaleSuccess(true);
+      } else {
+        setSuccessMessage(`Successfully placed P2P order (${order.id}) with ${merchantName} for ${buyAmountKes} ${selectedFiat}! ${order.crypto_amount.toFixed(8)} ${selectedAsset} escrow reserved.`);
+        setTimeout(() => {
+          setShowCheckoutModal(false);
+          setSuccessMessage("");
+        }, 3000);
+      }
     } catch (err) {
       alert(err instanceof Error ? err.message : "P2P order failed");
     } finally {
@@ -119,6 +125,70 @@ export function P2PScreen({ onBack }: { onBack?: () => void }) {
       alert(err instanceof Error ? err.message : "Sell order failed");
     }
   };
+
+  if (showSaleSuccess) {
+    return (
+      <div className="relative min-h-dvh bg-[#202630] text-[#f5f6fa] font-sans flex flex-col justify-between max-w-[430px] mx-auto overflow-hidden">
+        {/* Status bar */}
+        <div className="h-[68px] px-[30px] flex items-center justify-between bg-[#151a22] text-[15px] font-semibold">
+          <span>21:56</span>
+          <span className="text-[#fcd535]">◆ ◉ ⌁ •</span>
+          <span>◖ Wi-Fi ▮ 31</span>
+        </div>
+
+        {/* Close button */}
+        <button
+          className="absolute top-[78px] right-[29px] border-none bg-transparent text-[#e1e5ec] text-[38px] font-light cursor-pointer"
+          onClick={() => setShowSaleSuccess(false)}
+          aria-label="Close"
+        >×</button>
+
+        {/* Transaction success */}
+        <section className="pt-[140px] text-center px-5">
+          <div className="w-[154px] h-[154px] mx-auto mb-[48px] border-4 border-[#2dbd8b] rounded-full flex items-center justify-center">
+            <svg viewBox="0 0 100 100" className="w-[116px] h-[116px]">
+              <circle cx="50" cy="50" r="39" fill="#2DBD8B" />
+              <path d="M29 51 L43 65 L70 36" fill="none" stroke="#202630" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <h1 className="mb-[24px] text-[40px] font-extrabold tracking-tight">KSh {buyAmountKes ? Number(buyAmountKes).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : "3,871.74"}</h1>
+          <p className="text-[#9ba3b2] text-[22px]">Successfully sold {buyAmountKes && merchantPrice ? (Number(buyAmountKes) / Number(merchantPrice)).toFixed(2) : "30"} {selectedAsset}</p>
+        </section>
+
+        {/* Rewards section */}
+        <section className="mx-[29px] my-[60px] p-[25px_22px_29px] bg-[#2a323f] rounded-[22px]">
+          <h2 className="mb-[24px] text-[#aeb5c2] text-[22px] font-extrabold text-left">Get Rewards</h2>
+          <div className="flex items-center gap-[14px]">
+            <div className="w-[62px] h-[62px] flex-shrink-0 border-2 border-[#80a72d] rounded-full bg-[#4c861c] text-white flex items-center justify-center text-[10px] font-extrabold">NVIDIA</div>
+            <p className="flex-1 text-[18px] leading-[1.4] font-bold text-left">
+              Unlock $1 NVDAB Token Voucher with Stock Options
+            </p>
+            <button
+              className="p-[13px_16px] border-none rounded-[9px] bg-[#323b47] text-white text-[16px] font-bold cursor-pointer"
+              onClick={() => alert("Your rewards page would open here.")}
+            >Go</button>
+          </div>
+        </section>
+
+        {/* Bottom buttons */}
+        <footer className="sticky bottom-0 w-full px-[29px] pb-[max(30px,env(safe-area-inset-bottom))] flex flex-col gap-[18px] bg-[#202630] pt-4">
+          <button
+            className="w-full min-h-[68px] border-none rounded-[13px] bg-[#fcd535] text-[#181b20] text-[22px] font-bold cursor-pointer"
+            onClick={() => { setShowSaleSuccess(false); if (onBack) onBack(); }}
+          >
+            View assets
+          </button>
+          <button
+            className="w-full min-h-[68px] border-none rounded-[13px] bg-[#323b47] text-[#f5f6fa] text-[22px] font-bold cursor-pointer"
+            onClick={() => alert("Order Details\n\nStatus: Successful\nSold: 30 " + selectedAsset + "\nReceived: KSh " + (buyAmountKes || "3,871.74"))}
+          >
+            Order details
+          </button>
+          <div className="w-[135px] h-[5px] rounded-[20px] bg-[#777982] mx-auto mt-1 mb-1"></div>
+        </footer>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-dvh bg-[#0B0E11] text-[#EAECEF] pb-24 font-sans text-sm">

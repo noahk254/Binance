@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sale Successful</title>
+
+  <style>
+    /* ===== GENERAL STYLES ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --background: #202630;
+      --surface: #2a323f;
+      --button-gray: #323b47;
+      --text: #f5f6fa;
+      --muted: #9ba3b2;
+      --green: #2dbd8b;
+      --yellow: #fcd535;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--background);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    /* ===== MAIN SCREEN ===== */
+    .phone-screen {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: var(--background);
+      overflow: hidden;
+      max-width: 430px;
+      margin: 0 auto;
+    }
+
+    /* ===== STATUS BAR ===== */
+    .status-bar {
+      height: 68px;
+      padding: 0 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #151a22;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .status-icons {
+      color: var(--yellow);
+    }
+
+    /* ===== CLOSE BUTTON ===== */
+    .close-btn {
+      position: absolute;
+      top: 78px;
+      right: 29px;
+      border: none;
+      background: transparent;
+      color: #e1e5ec;
+      font-size: 38px;
+      font-weight: 200;
+      cursor: pointer;
+    }
+
+    /* ===== SUCCESS MESSAGE ===== */
+    .success-section {
+      padding-top: 140px;
+      text-align: center;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    .success-icon {
+      width: 154px;
+      height: 154px;
+      margin: 0 auto 48px;
+      border: 4px solid var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .success-icon svg {
+      width: 116px;
+      height: 116px;
+    }
+
+    .success-section h1 {
+      margin-bottom: 24px;
+      font-size: 40px;
+      font-weight: 750;
+      letter-spacing: -1.5px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 22px;
+    }
+
+    /* ===== REWARDS CARD ===== */
+    .rewards-card {
+      margin: 60px 29px 40px;
+      padding: 25px 22px 29px;
+      background: var(--surface);
+      border-radius: 22px;
+    }
+
+    .rewards-card h2 {
+      margin-bottom: 24px;
+      color: #aeb5c2;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .reward-content {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .nvidia-logo {
+      width: 62px;
+      height: 62px;
+      flex-shrink: 0;
+      border: 2px solid #80a72d;
+      border-radius: 50%;
+      background: #4c861c;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .reward-content p {
+      flex: 1;
+      font-size: 18px;
+      line-height: 1.4;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .go-btn {
+      padding: 13px 16px;
+      border: none;
+      border-radius: 9px;
+      background: var(--button-gray);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ===== BOTTOM ACTION BUTTONS ===== */
+    .bottom-actions {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      width: 100%;
+      max-width: 430px;
+      padding: 0 29px 30px;
+      padding-bottom: max(30px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      background: var(--background);
+    }
+
+    .bottom-actions button {
+      width: 100%;
+      min-height: 68px;
+      border: none;
+      border-radius: 13px;
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .assets-btn {
+      background: var(--yellow);
+      color: #181b20;
+    }
+
+    .details-btn {
+      background: var(--button-gray);
+      color: var(--text);
+    }
+
+    .bottom-actions button:active,
+    .go-btn:active {
+      transform: scale(0.99);
+      opacity: 0.85;
+    }
+
+    /* ===== PHONE NAVIGATION BAR ===== */
+    .gesture-bar {
+      position: absolute;
+      bottom: 7px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 135px;
+      height: 5px;
+      border-radius: 20px;
+      background: #777982;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="phone-screen">
+
+    <!-- Status bar -->
+    <div class="status-bar">
+      <span>21:56</span>
+      <span class="status-icons">◆ ◉ ⌁ •</span>
+      <span>◖ Wi-Fi ▮ 31</span>
+    </div>
+
+    <!-- Close button -->
+    <button
+      class="close-btn"
+      aria-label="Close"
+      onclick="closePage()"
+    >×</button>
+
+    <!-- Transaction success -->
+    <section class="success-section">
+
+      <div class="success-icon">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <circle
+            cx="50"
+            cy="50"
+            r="39"
+            fill="#2DBD8B"
+          />
+
+          <path
+            d="M29 51 L43 65 L70 36"
+            fill="none"
+            stroke="#202630"
+            stroke-width="6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
+
+      <h1>KSh 3,871.74</h1>
+      <p class="subtitle">Successfully sold 30 USDT</p>
+
+    </section>
+
+    <!-- Rewards section -->
+    <section class="rewards-card">
+
+      <h2>Get Rewards</h2>
+
+      <div class="reward-content">
+
+        <div class="nvidia-logo">NVIDIA</div>
+
+        <p>
+          Unlock $1 NVDAB Token Voucher
+          with Stock Options
+        </p>
+
+        <button
+          class="go-btn"
+          onclick="showReward()"
+        >Go</button>
+
+      </div>
+    </section>
+
+    <!-- Bottom buttons -->
+    <footer class="bottom-actions">
+
+      <button
+        class="assets-btn"
+        onclick="viewAssets()"
+      >
+        View assets
+      </button>
+
+      <button
+        class="details-btn"
+        onclick="viewDetails()"
+      >
+        Order details
+      </button>
+
+      <div class="gesture-bar"></div>
+
+    </footer>
+
+  </main>
+
+  <script>
+    function viewAssets() {
+      alert("Your assets page would open here.");
+    }
+
+    function viewDetails() {
+      alert(
+        "Order Details\n\n" +
+        "Status: Successful\n" +
+        "Sold: 30 USDT\n" +
+        "Received: KSh 3,871.74"
+      );
+    }
+
+    function showReward() {
+      alert("Your rewards page would open here.");
+    }
+
+    function closePage() {
+      if (history.length > 1) {
+        history.back();
+      } else {
+        alert("You are viewing the transaction confirmation page.");
+      }
+    }
+  </script>
+
+</body>
+</html>
