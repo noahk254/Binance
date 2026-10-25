@@ -119,14 +119,14 @@ export function SpotScreen() {
               </span>
             </span>
 
-            <button
-              type="button"
-              className={`mt-1.5 rounded-[10px] py-3.5 text-center text-[16px] font-semibold transition-opacity hover:opacity-90 ${
-                buy ? "bg-green text-onyellow" : "bg-red text-white"
-              }`}
-            >
-              {buy ? "Buy BTC" : "Sell BTC"}
-            </button>
+             <button
+               type="button"
+               className={`mt-1.5 rounded-[10px] py-3.5 text-center text-[16px] font-semibold transition-opacity hover:opacity-90 ${
+                 buy ? "bg-green text-onyellow" : "bg-red text-white"
+               }`}
+             >
+               {buy ? "Buy" : "Sell"}
+             </button>
           </div>
 
           <div className="flex-1">
